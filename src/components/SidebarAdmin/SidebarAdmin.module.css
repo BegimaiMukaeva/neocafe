@@ -1,0 +1,42 @@
+.main {
+    width: 202px;
+    height: 100vh;
+    padding: 32px;
+    border-right: 1px solid rgba(128, 128, 128, 0.44);
+}
+.sidebarMenuImg {
+    margin-bottom: 40px;
+}
+.sidebarMenu {
+    margin: 16px 0;
+}
+.sidebarMenu a {
+    font-family: Nunito;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: 0em;
+    color: #00315D;
+    text-decoration: none;
+}
+.sidebarMenu a:hover {
+    border-bottom: 2px solid #00315D;
+}
+.sidebarMenuButton {
+    margin-top: 440px;
+    height: 30px;
+    width: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.sidebarMenuButton button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: Nunito;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 22px;
+}
