@@ -13,7 +13,7 @@
     line-height: 58px;
     color: #171717;
 }
-.searchMenuInput input {
+.searchInput {
     width: 976px;
     height: 42px;
     padding: 10px 16px 10px 16px;
@@ -22,6 +22,21 @@
     background: #E7E7E7;
     border: none;
 }
+/* YourComponent.module.css */
+.searchInput::placeholder {  /* Это будет целевым элементом для стилей плейсхолдера */
+  background-color: red; /* Пример цвета текста */
+  opacity: 1; /* Необходимо для некоторых браузеров, чтобы цвет был виден */
+}
+
+/* Поддержка разных браузеров */
+.searchInput:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #909090;
+}
+
+.searchInput::-ms-input-placeholder { /* Microsoft Edge */
+  color: #909090;
+}
+
 .searchMenuInput button {
     width: 164px;
     height: 42px;
@@ -29,4 +44,7 @@
     background: #00315D;
     color: white;
     margin-left: 20px;
+}
+.searchIcon {
+    margin-right: 90px;
 }

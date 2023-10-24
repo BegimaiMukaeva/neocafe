@@ -1,0 +1,82 @@
+.table {
+  font-family: Nunito;
+  margin-top: 1%;
+  max-width: 100%;
+}
+.table__caretIcon {
+  width: 20px;
+  height: 20px;
+}
+.table th {
+  margin-right: 30px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  text-align: start;
+}
+.table th:first-child {
+  text-align: center;
+}
+.table tbody td {
+  padding-right: 30px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+}
+.table tbody tr {
+  background: #f9f9f9;
+}
+.table tbody tr td:first-child {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.table__branch {
+  display: flex;
+  margin-top: 10px;
+  gap: 30px;
+}
+.table__categoryTh {
+  display: flex;
+  gap: 5px;
+  padding-top: 10px;
+  padding-left: 20px;
+}
+.table__caretDown {
+  margin-top: 3px;
+}
+.table__hrLine {
+  max-width: 1238px;
+  height: 2px;
+  background: #171717;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.paginationContainer button {
+  width: 37px;
+  height: 36px;
+  border: none;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+}
+.paginationContainer .activeNum {
+  border-bottom: 1px solid #000;
+  padding-top: 2px;
+}
+.paginationContainer .rightBtn {
+  border-left: 1px solid #d8d8d8;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+.paginationContainer .leftBtn {
+  border-right: 1px solid #d8d8d8;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+/*# sourceMappingURL=TableAdminPage.module.css.map */
