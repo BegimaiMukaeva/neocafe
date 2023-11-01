@@ -27,7 +27,7 @@
     background: #E7E7E7;
     border: none;
 }
-.searchMenuInput button {
+.searchMenuInput .newPosition {
     width: 164px;
     height: 42px;
     border-radius: 6px;

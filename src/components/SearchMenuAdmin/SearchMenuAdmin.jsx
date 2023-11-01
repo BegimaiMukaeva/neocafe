@@ -3,10 +3,12 @@ import searchIcon from '../../img/searchAdminIcon.svg';
 import styles from './SearchMenuAdmin.module.css';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
-import NotificationsAdminPage from '../../components/modalMenu/NotificationsAdminPage/NotificationsAdminPage'
+import NotificationsAdminPage from '../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
+import AddPositionModal from '../modalMenu/AddPositionModal/AddPositionModal';
 
 const SearchMenuAdmin = () => {
-const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -15,6 +17,14 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     const handleCancel = () => {
         setIsModalVisible(false);
     };
+    const openModal = () => {
+        setIsAddModalVisible(true);
+    };
+
+    const cancelModal = () => {
+        setIsAddModalVisible(false);
+    };
+
     return (
         <div className={styles.main}>
             <div className={styles.searchMenu}>
@@ -29,7 +39,11 @@ const [isModalVisible, setIsModalVisible] = useState(false);
             </div>
             <div className={styles.searchMenuInput}>
                 <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />
-                <button>Создать</button>
+                <button className={styles.newPosition} onClick={openModal}>Создать</button>
+                <AddPositionModal
+                    isVisible={isAddModalVisible}
+                    onClose={cancelModal}
+                />
             </div>
         </div>
     );
