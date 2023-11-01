@@ -1,0 +1,78 @@
+.modalWrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modalHidden {
+  display: none;
+}
+.modalContent {
+    width: 600px;
+    height: 355px;
+    background-color: #FEFEFE;
+    border-radius: 30px;
+    padding: 32px;
+    box-sizing: border-box;
+    font-family: Nunito;
+}
+.cancelButtonCategory {
+  display: flex;
+  justify-content: space-between;
+}
+.cancelButtonCategory h2 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 33px;
+}
+.modalCloseButton{
+  background-color: transparent;
+  border: none;
+}
+.categoryName {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 26px;
+  margin: 30px 0;
+}
+.categoryInput {
+  width: 100%;
+  height: 66px;
+  padding: 24px 16px;
+  border-radius: 10px;
+  gap: 10px;
+  background: #EDEDED;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 18px;
+  outline: none;
+}
+.buttons {
+  margin-top: 45px;
+  display: flex;
+  justify-content: space-between;
+}
+.buttons button {
+  width: 252px;
+  height: 54px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  border-radius: 6px;
+}
+.cancelButton {
+  background-color: #FEFEFE;
+  color: #00315D;
+  border: 1px solid #00315d;
+}
+.categoryAddButton {
+  background: #00315D;
+  color: #ffffff;
+  border: 1px solid #00315d;
+}

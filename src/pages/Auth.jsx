@@ -40,10 +40,10 @@ const Auth = () => {
         await axios.post('/api/auth', { username, password });
         navigate('/');
       } catch (error) {
-        setError('Данные введены неверно, попробуйте еще раз');
+        setError('Логин или пароль неверный, попробуйте еще раз');
       }
     } else {
-      setError('Данные введены неверно, попробуйте еще раз');
+      setError('Логин или пароль неверный, попробуйте еще раз');
     }
   };
 
