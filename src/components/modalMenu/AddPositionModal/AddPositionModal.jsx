@@ -39,6 +39,19 @@ function AddPositionModal({ isVisible , onClose }) {
         }
         return true;
    };
+   const resetFields = () => {
+        setPositionName("");
+        setDescription("");
+        setCategory("");
+        setImage(null);
+        setIngredientType("");
+        setMeasurement("");
+        setAmount("");
+        setPrice("");
+        setIngredients([{ name: "", amount: "" }]);
+        setErrorMessage("");
+    };
+
 
 
     return (
@@ -47,9 +60,12 @@ function AddPositionModal({ isVisible , onClose }) {
               <div className={styles.modalContainer}>
                   <div className={styles.titleModal}>
                       <h2 className={styles.title}>Новая позиция</h2>
-                      <button className={styles.modalCloseButton} onClick={onClose}>
-                        <img src={closeModal} alt=""/>
-                      </button>
+                      <button className={styles.modalCloseButton} onClick={() => {
+                            resetFields();
+                            onClose();
+                        }}>
+                            <img src={closeModal} alt=""/>
+                        </button>
                   </div>
 
                   <div className={styles.imageUpload}>
@@ -180,7 +196,10 @@ function AddPositionModal({ isVisible , onClose }) {
 
 
                   <div className={styles.buttons}>
-                      <button onClick={onClose} className={styles.cancelButton}>Отмена</button>
+                      <button className={styles.cancelButton} onClick={() => {
+                            resetFields();
+                            onClose();
+                        }}>Отмена</button>
                       <button className={styles.saveButton} disabled={!isFormValid()}>Создать</button>
                   </div>
               </div>
