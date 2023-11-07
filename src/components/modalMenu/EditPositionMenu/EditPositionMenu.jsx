@@ -1,56 +1,58 @@
 import React, { useState } from 'react';
-import styles from './AddPositionModal.module.css';
+import styles from '../AddPositionModal/AddPositionModal.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
 
-function AddPositionModal({ isVisible , onClose }) {
-    const [positionName, setPositionName] = useState("");
-    const [description, setDescription] = useState("");
-    const [category, setCategory] = useState("");
-    const [image, setImage] = useState(null);
-    const [ingredientType, setIngredientType] = useState(""); // Сырье или Готовая продукция
-    const [measurement, setMeasurement] = useState("");
-    const [amount, setAmount] = useState("");
-    const [price, setPrice] = useState("");
-    const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
-    const [errorMessage, setErrorMessage] = useState("");
 
-   const addIngredient = () => {
-        const lastIngredient = ingredients[ingredients.length - 1];
+const staticData = {
+    name: "Latte",
+    description: "Creamy coffee with milk",
+    category: "Кофе",
+    price: "150",
+    ingredients: [
+        { name: "Coffee", amount: "50" },
+        { name: "Milk", amount: "200" }
+    ]
+};
 
-        if (!lastIngredient.name || !lastIngredient.amount) {
-            setErrorMessage("Сначала заполните предыдущие поля для состав блюда!");
-            return;
-        }
+function EditPositionMenu({ isVisible , onClose,currentPosition }) {
+        const [positionName, setPositionName] = useState(currentPosition?.name || staticData.name);
+        const [description, setDescription] = useState(currentPosition?.description || staticData.description);
+        const [category, setCategory] = useState(currentPosition?.category || staticData.category);
+        const [price, setPrice] = useState(currentPosition?.price || staticData.price);
+        const [ingredients, setIngredients] = useState(currentPosition?.ingredients || staticData.ingredients);
+        const [image, setImage] = useState(currentPosition?.image || null);
+        const [errorMessage, setErrorMessage] = useState("");
+        const addIngredient = () => {
+                const lastIngredient = ingredients[ingredients.length - 1];
 
-        setIngredients([...ingredients, { name: "", amount: "" }]);
-        setErrorMessage("");
-    };
+            if (!lastIngredient.name || !lastIngredient.amount) {
+                setErrorMessage("Сначала заполните предыдущие поля для состав блюда!");
+                return;
+            }
 
-   const isFormValid = () => {
-        if (!positionName || !description || !category || !price) {
-            return false;
-        }
-        for (let ingredient of ingredients) {
-            if (!ingredient.name || !ingredient.amount) {
+            setIngredients([...ingredients, { name: "", amount: "" }]);
+            setErrorMessage("");
+        };
+
+        const saveChanges = () => {
+            if (!isFormValid()) return;
+            // Например, onUpdatePosition({ positionName, description, category, image, price, ingredients });
+            onClose();
+        };
+
+       const isFormValid = () => {
+            if (!positionName || !description || !category || !price) {
                 return false;
             }
-        }
-        return true;
-   };
-   const resetFields = () => {
-        setPositionName("");
-        setDescription("");
-        setCategory("");
-        setImage(null);
-        setIngredientType("");
-        setMeasurement("");
-        setAmount("");
-        setPrice("");
-        setIngredients([{ name: "", amount: "" }]);
-        setErrorMessage("");
-    };
+            for (let ingredient of ingredients) {
+                if (!ingredient.name || !ingredient.amount) {
+                    return false;
+                }
+            }
+            return true;
+       };
 
     return (
         isVisible && (
@@ -58,10 +60,7 @@ function AddPositionModal({ isVisible , onClose }) {
               <div className={styles.modalContainer}>
                   <div className={styles.titleModal}>
                       <h2 className={styles.title}>Новая позиция</h2>
-                      <button className={styles.modalCloseButton} onClick={() => {
-                            resetFields();
-                            onClose();
-                        }}>
+                      <button className={styles.modalCloseButton} onClick={onClose}>
                             <img src={closeModal} alt=""/>
                         </button>
                   </div>
@@ -87,7 +86,7 @@ function AddPositionModal({ isVisible , onClose }) {
                         onChange={(e) => setImage(e.target.files[0])}
                         className={styles.imageInput}
                     />
-                  </div>
+                </div>
 
 
                   <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
@@ -169,6 +168,7 @@ function AddPositionModal({ isVisible , onClose }) {
                                           className={styles.amountInput}
                                       />
                                   </label>
+
                                   <label className={styles.nameOfInput}  htmlFor="">Изм-я
                                       <select
                                           className={styles.selectInput}
@@ -194,11 +194,8 @@ function AddPositionModal({ isVisible , onClose }) {
 
 
                   <div className={styles.buttons}>
-                      <button className={styles.cancelButton} onClick={() => {
-                            resetFields();
-                            onClose();
-                        }}>Отмена</button>
-                      <button className={styles.saveButton} disabled={!isFormValid()}>Создать</button>
+                      <button className={styles.cancelButton} onClick={onClose}>Отмена</button>
+                      <button className={styles.saveButton} onClick={saveChanges} disabled={!isFormValid()}>Обновить</button>
                   </div>
               </div>
           </div>
@@ -206,4 +203,4 @@ function AddPositionModal({ isVisible , onClose }) {
     );
 }
 
-export default AddPositionModal;
+export default EditPositionMenu;

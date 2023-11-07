@@ -1,9 +1,9 @@
 import React, {useRef, useEffect, useState} from "react";
-import styles from "./EditDeleteItemModel.module.css";
-import pencilImg from "../../../img/Pencil.svg";
-import trashSimple from '../../../img/TrashSimpleEditDelete.svg';
+import styles from "../../../modalMenu/EditDeleteItemModel/EditDeleteItemModel.module.css";
+import pencilImg from "../../../../img/Pencil.svg";
+import trashSimple from '../../../../img/TrashSimpleEditDelete.svg';
 import DeleteItemModel from "../DeleteItemModel/DeleteItemModel";
-import EditPositionMenu from '../EditPositionMenu/EditPositionMenu';
+import EditPositionMenu from '../EditPositionModal/EditPositionModal';
 
 const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
     const modalContentRef = useRef(null);

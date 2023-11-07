@@ -1,0 +1,69 @@
+.modalDeleteWrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modalHidden {
+  display: none;
+}
+.deleteModalContent {
+    width: 600px;
+    height: 260px;
+    background-color: #FEFEFE;
+    border-radius: 30px;
+    padding: 32px;
+    box-sizing: border-box;
+    font-family: Nunito;
+}
+.titleDeleteModal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.titleDeleteModal h3 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 33px;
+  color: #000000;
+  width: 100%;
+  text-align: center;
+}
+.titleDeleteModal .modalCloseButton{
+  background-color: transparent;
+    border: none
+}
+.categoryName {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 26px;
+    color: #000000;
+    margin: 30px 0;
+}
+.deleteButtons {
+  display: flex;
+  justify-content: space-between;
+}
+.deleteButtons button {
+  width: 252px;
+  height: 54px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  border-radius: 6px;
+}
+.deleteItemButton {
+  background-color: #FEFEFE;
+  color: #00315D;
+  border: 1px solid #00315d;
+}
+.cancelDeleteButton {
+  background: #00315D;
+  color: #ffffff;
+  border: 1px solid #00315d;
+}

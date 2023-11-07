@@ -1,0 +1,38 @@
+.main {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 0 24px;
+    font-family: Nunito;
+}
+.navigateProductButton {
+    background-color: transparent;
+    border: none;
+    margin-right: 150px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    color: #C1C1C3;
+    border-bottom: 3px solid transparent;
+    padding: 0 0 20px 0 ;
+}
+.navigateProductLastButton {
+    color: #FF4B4B;
+    background-color: transparent;
+    border: none;
+    margin-right: 150px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    border-bottom: 3px solid transparent;
+    padding: 0 0 20px 0 ;
+}
+.navigateProductActiveButton {
+    color: #00315d;
+    border-bottom: 3px solid #00315d;
+}
+
+.navigateProductLastButtonActive {
+    color: #FF4B4B;
+    border-bottom: 3px solid #FF4B4B;
+}

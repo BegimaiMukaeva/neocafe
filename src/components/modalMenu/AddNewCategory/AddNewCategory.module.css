@@ -14,7 +14,7 @@
 }
 .modalContent {
     width: 600px;
-    height: 355px;
+    height: auto;
     background-color: #FEFEFE;
     border-radius: 30px;
     padding: 32px;
@@ -75,4 +75,63 @@
   background: #00315D;
   color: #ffffff;
   border: 1px solid #00315d;
+}
+
+.imageUpload {
+    margin-bottom: 15px;
+}
+
+.imageLabel {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 26px;
+    margin: 20px 0 16px 0;
+}
+.imageUpload {
+    position: relative;
+    width: 100%;
+    max-width: 530px;
+}
+.imageBorder {
+    text-align: center;
+    position: relative;
+    width: 536px;
+    height: 209px;
+    padding: 18px 40px;
+    margin-top: 16px;
+    background-color: #F4F4F4;
+}
+.imagePreview {
+    border: 1px dashed #ccc;
+    width: 456px;
+    height: 173px;
+    background-color: #FEFEFE;
+    padding: 12px;
+}
+
+.imagePreview img {
+    max-width: 100px;
+    max-height: 100px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+    border: 1px solid #C1C1C3;
+}
+.imageText {
+    text-align: center;
+    margin-top: 8px;
+}
+.imageChangeText {
+    color: #00315d;
+    border-bottom: 1px solid #00315d;
+}
+.imageInput {
+    background-color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
 }

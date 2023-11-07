@@ -5,6 +5,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 24px;
+    width: 1160px;
 }
 .searchMenu h2 {
     font-family: Nunito;

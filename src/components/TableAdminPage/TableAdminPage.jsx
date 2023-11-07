@@ -191,7 +191,7 @@ const TableAdminPage = () => {
                   <td>{item.ingredients}</td>
                   <td>{item.price}</td>
                   <td className={styles.table__branch}>
-                    <img src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(item.id)}/>
+                    <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(item.id)}/>
                     <EditDeleteItemModel
                       isVisible={isOpenEditDeleteModal && item.id === currentItemId}
                       onClose={closeEditDeleteModal}

@@ -26,7 +26,7 @@
     border: 1px solid #C1C1C3;
     background-color: #FEFEFE;
 }
-.buttons img {
+.buttons .buttonImg {
     width: 19px;
     height: 19px;
     margin-left: 7px;
