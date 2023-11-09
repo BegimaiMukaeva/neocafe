@@ -1,0 +1,82 @@
+.main {
+    padding: 16px 0 32px 22px;
+    font-family: Nunito;
+}
+.searchMenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    width: 1160px;
+}
+.searchMenu h2 {
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 58px;
+    color: #171717;
+}
+.searchMenuButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+.searchInput {
+    width: 727px;
+    height: 42px;
+    padding: 10px 16px 10px 16px;
+    border-radius: 6px;
+    gap: 8px;
+    background: #E7E7E7;
+    border: none;
+}
+.searchMenuInput .newPosition {
+    width: 164px;
+    height: 42px;
+    border-radius: 6px;
+    background: #00315D;
+    color: white;
+    margin-left: 20px;
+}
+.searchIcon {
+    cursor: pointer;
+}
+.filterStaffTitle {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #00315D;
+    margin-left: 30px;
+}
+.checkboxDay {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #F5F5F5;
+    border: 1px solid #CCCCCC;
+    padding: 5px;
+    display: inline-block;
+    position: relative;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: -5px;
+    margin-right: 12px;
+}
+
+.checkboxDay:checked {
+    background-color: #F5F5F5;
+    border: 1px solid #00315d;
+}
+
+.checkboxDay:checked::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 16px;
+    border: solid #00315D;
+    border-width: 0 3px 3px 0;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
