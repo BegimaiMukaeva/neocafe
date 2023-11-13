@@ -1,10 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import iconSidebar from '../../img/icon.svg';
 import signOut from '../../img/SignOut.svg';
 import { Link } from "react-router-dom";
 import styles from './SidebarAdmin.module.css';
+import SignOut from '../SignOut/SignOut';
 
 const SidebarAdmin = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+   const handleCancel = () => {
+       setIsModalOpen(false);
+   };
+
     return (
         <div className={styles.main}>
             <div className={styles.sidebarMenuImg}>
@@ -22,10 +32,14 @@ const SidebarAdmin = () => {
             <div className={styles.sidebarMenu}>
                 <Link to='/employees-page-admin'>Сотрудники</Link>
             </div>
-            <div className={styles.sidebarMenuButton}>
+            <div onClick={openModal} className={styles.sidebarMenuButton}>
                 <button>Выход</button>
                 <img src={signOut} alt=""/>
             </div>
+            <SignOut
+                isVisible={isModalOpen}
+                onClose={handleCancel}
+            />
         </div>
     );
 };

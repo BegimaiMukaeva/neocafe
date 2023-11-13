@@ -97,7 +97,7 @@ const WarehouseBalanceTable = () => {
   }, [showDropdown, styles.dropdown, styles.table__categoryTh]);
 
   return (
-        <div>
+        <div className={styles.main}>
           <table className={styles.table}>
             <thead>
               <tr>

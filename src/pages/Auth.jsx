@@ -11,6 +11,7 @@ const Auth = () => {
   const [pwdVisible, setPwdVisible] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [error, setError] = useState("");
+  const [tokens, setTokens] = useState({ access: "", refresh: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +24,6 @@ const Auth = () => {
 
   const handleInputChange = (e, type) => {
     if (error) setError("");
-
     const value = e.target.value;
     if (type === 'username') {
       setUsername(value);
@@ -34,18 +34,31 @@ const Auth = () => {
 
   const handleSubmit = async () => {
     setError("");
+    try {
+      const response = await axios.post('https://muha-backender.org.kg/accounts/admin-login/', {
+        username,
+        password
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.data.access) {
+        setTokens({ access: response.data.access, refresh: response.data.refresh });
 
-    if (username === 'admin' && password.length === 10) {
-      try {
-        await axios.post('/api/auth', { username, password });
+        localStorage.setItem('accessToken', response.data.access);
+        localStorage.setItem('refreshToken', response.data.refresh);
+
         navigate('/');
-      } catch (error) {
-        setError('Логин или пароль неверный, попробуйте еще раз');
+      } else {
+        throw new Error('Ошибка авторизации');
       }
-    } else {
+    } catch (error) {
       setError('Логин или пароль неверный, попробуйте еще раз');
     }
   };
+
+
 
   return (
     <div className={styles.auth}>
@@ -55,14 +68,14 @@ const Auth = () => {
         <Input
           className={`${styles.textInput} ${error ? styles.errorInput : ''}`}
           type="text"
-          placeholder="Username"
+          placeholder="Логин"
           value={username}
           onChange={(e) => handleInputChange(e, 'username')}
         />
         <Input
           className={`${styles.passwordInput} ${error ? styles.errorInput : ''}`}
           type={pwdVisible ? "text" : "password"}
-          placeholder="Password"
+          placeholder="Пароль"
           value={password}
           onChange={(e) => handleInputChange(e, 'password')}
           suffix={

@@ -15,7 +15,7 @@ function App() {
         <Route path='/employees-page-admin' element = {<EmployeesPageAdmin/>}/>
         <Route path='/auth' element = {<Auth/>}/>
       </Routes>
-    </div>
+      </div>
   );
 }
 

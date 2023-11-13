@@ -4,11 +4,11 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: rgba(0, 0, 0, 0.35) !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 1000;
 }
 .modalHidden {
   display: none;
@@ -58,12 +58,12 @@
   line-height: 22px;
   border-radius: 6px;
 }
-.deleteItemButton {
+.deleteButtons .deleteItemButton {
   background-color: #FEFEFE;
   color: #00315D;
   border: 1px solid #00315d;
 }
-.cancelDeleteButton {
+.deleteButtons .cancelDeleteButton {
   background: #00315D;
   color: #ffffff;
   border: 1px solid #00315d;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from 'axios';
 import styles from "./AddNewCategory.module.css";
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
@@ -7,8 +8,27 @@ const AddNewCategory = ({ isVisible, onClose }) => {
   const [categoryName, setCategoryName] = useState('');
   const [image, setImage] = useState(null);
 
-  const handleSubmit = () => {
-    console.log("Новая категория:", categoryName);
+  const handleSubmit = async () => {
+    try {
+      // Извлечение токена доступа из localStorage
+      const accessToken = localStorage.getItem('accessToken');
+
+      await axios.post('https://muha-backender.org.kg/admin-panel/categories/create/', {
+        name: categoryName
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          // 'X-CSRFToken': 'ВАШ_CSRF_TOKEN', // Если нужен CSRF токен
+        }
+      });
+
+      console.log("Категория создана:", categoryName);
+      onClose(); // Закрыть модальное окно после успешного создания
+    } catch (error) {
+      console.error('Ошибка при создании категории: ', error);
+      // Обработка ошибок создания категории
+    }
   };
 
   return (

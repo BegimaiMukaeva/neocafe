@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "./BranchesTablePage.module.css";
 import {
   LeftOutlined,
@@ -19,16 +20,31 @@ const staticData = [
 
 
 const BranchesTablePage = () => {
+  const [branches, setBranches] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
   const [showDropdown, setShowDropdown] = useState(false);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = staticData.slice(indexOfFirstItem, indexOfLastItem);
   const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
   const [currentItemId, setCurrentItemId] = useState(null);
 
+  useEffect(() => {
+      const fetchBranches = async () => {
+        try {
+          const response = await axios.get('https://muha-backender.org.kg/branches/', {
+            headers: {
+              'accept': 'application/json',
+              // Добавьте здесь заголовок авторизации, если он требуется
+            }
+          });
+          setBranches(response.data);
+        } catch (error) {
+          console.error('Ошибка при получении данных о филиалах:', error);
+        }
+      };
+
+    fetchBranches();
+  }, []);
 
   const handlePaginationClick = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -70,8 +86,12 @@ const BranchesTablePage = () => {
     };
   }, [showDropdown, styles.dropdown, styles.table__categoryTh]);
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = branches.slice(indexOfFirstItem, indexOfLastItem);
+
   return (
-        <div>
+        <div className={styles.main}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -86,12 +106,16 @@ const BranchesTablePage = () => {
               </div>
             </td>
             <tbody>
-              {currentItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.number}</td>
-                  <td>{item.name}</td>
+              {currentItems.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{item.schedule.title}</td>
                   <td>{item.address}</td>
-                  <td>{item.workingHours}</td>
+                  <td>
+                        {item.workdays && item.workdays.length > 0
+                          ? "Каждый день с " + item.workdays[0].start_time.substring(0, 5) + " до " + item.workdays[0].end_time.substring(0, 5)
+                          : "График работы не указан"}
+                  </td>
                   <td className={styles.table__branch}>
                     <img
                       className={styles.dotsIcon}

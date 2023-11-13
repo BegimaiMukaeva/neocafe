@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import styles from "./TableAdminPage.module.css";
 import {
   CaretDownOutlined,
@@ -49,7 +50,7 @@ const staticData = [
     price: "120 сом",
   },
 ];
-const categories = ["Категория", "Кофе", "Десерты", "Коктейли", "Выпечка", "Чай"];
+// const categories = ["Категория", "Кофе", "Десерты", "Коктейли", "Выпечка", "Чай"];
 
 
 const TableAdminPage = () => {
@@ -67,16 +68,45 @@ const TableAdminPage = () => {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
   const [currentItemId, setCurrentItemId] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [categoryIdToDelete, setCategoryIdToDelete] = useState(null); // Добавленное состояние для id категории
+  const [categoryNameToDelete, setCategoryNameToDelete] = useState(''); // Добавленное состояние для названия категории
+
+  const fetchCategories = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get('https://muha-backender.org.kg/admin-panel/categories/', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        }
+      });
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Ошибка при получении категорий: ', error);
+    }
+  };
 
   const toggleDropdown = () => {
+    if (!showDropdown) {
+      fetchCategories();
+    }
     setShowDropdown(!showDropdown);
   };
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
+  useEffect(() => {
+    if (!isModalOpen) {
+      // Когда модальное окно закрывается, обновляем категории и закрываем dropdown
+      fetchCategories();
+      setShowDropdown(false);
+    }
+  }, [isModalOpen]); // Зависимость от состояния модального окна
+
+ const handleCategorySelect = (categoryName) => {
+    setSelectedCategory(categoryName);
     setShowDropdown(false);
-  };
-  
+ };
+
   const handlePaginationClick = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -98,9 +128,17 @@ const TableAdminPage = () => {
    const handleCancel = () => {
      setIsModalOpen(false);
    };
+  // const openDeleteModal = (category, event) => {
+  //   event.stopPropagation(); // Предотвращаем всплытие события
+  //   setCategoryToDelete(category);
+  //   setIsDeleteModalOpen(true);
+  //   // setShowDropdown(false); // Закрытие dropdown
+  // };
   const openDeleteModal = (category, event) => {
     event.stopPropagation();
-    setCategoryToDelete(category);
+    setCategoryToDelete(category.name);
+    setCategoryIdToDelete(category.id); // Установка id выбранной категории
+    setCategoryNameToDelete(category.name); // Установка имени выбранной категории
     setIsDeleteModalOpen(true);
   };
 
@@ -115,7 +153,6 @@ const TableAdminPage = () => {
   const closeEditDeleteModal = () => {
     setIsOpenEditDeleteModal(false);
   }
-
 
    useEffect(() => {
     const handleDocumentClick = (event) => {
@@ -132,7 +169,7 @@ const TableAdminPage = () => {
   }, [showDropdown, styles.dropdown, styles.table__categoryTh]);
 
   return (
-        <div>
+        <div className={styles.main}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -148,20 +185,21 @@ const TableAdminPage = () => {
                       {categories.map((category) => (
                         <div
                           className={styles.menuCategory}
-                          key={category}
-                          onClick={() => handleCategorySelect(category)}
-                          onMouseEnter={() => setHoveredCategory(category)}
+                          key={category.id}
+                          onClick={() => handleCategorySelect(category.name)} // Используйте name или другое свойство
+                          onMouseEnter={() => setHoveredCategory(category.name)}
                           onMouseLeave={() => setHoveredCategory(null)}
                         >
-                          {category}
-                          {hoveredCategory === category && category !== "Категория" && (
+                          {category.name}
+                          {hoveredCategory === category.name && category.name !== "Категория" && (
                             <img src={TrashSimple} alt="" onClick={(event) => openDeleteModal(category, event)}  />
                           )}
                           <DeleteCategoryModal
                               isVisible={isDeleteModalOpen}
                               onClose={closeDeleteModal}
-                              categoryName={categoryToDelete}
-                          />
+                              categoryId={categoryIdToDelete} // Передача id категории в модальное окно
+                              categoryName={categoryNameToDelete} // Передача имени категории в модальное окно
+                           />
                         </div>
                       ))}
                       <div className={styles.addCategoryIcon} onClick={toggleModal}>

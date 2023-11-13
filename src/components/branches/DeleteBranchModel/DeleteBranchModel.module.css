@@ -8,6 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 100;
 }
 .modalHidden {
   display: none;
@@ -49,7 +50,7 @@
   display: flex;
   justify-content: space-between;
 }
-.deleteButtons button {
+.deleteItemButton, .cancelDeleteButton {
   width: 252px;
   height: 54px;
   font-size: 18px;

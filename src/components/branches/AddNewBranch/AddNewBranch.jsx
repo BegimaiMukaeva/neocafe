@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import axios from "axios";
 import styles from './AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 
-function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
+function AddNewBranch({ isVisible , onClose }) {
     const [positionName, setPositionName] = useState("");
     const [image, setImage] = useState(null);
     const [positionAddress, setPositionAddress] = useState("");
     const [positionPhone, setPositionPhone] = useState("");
     const [positionTwoGis, setPositionTwoGis] = useState("");
+    const [errorMessages, setErrorMessages] = useState([]);
     const [schedule, setSchedule] = useState({
       monday: { isActive: true, from: "11:00", to: "22:00" },
       tuesday: { isActive: true, from: "11:00", to: "22:00" },
@@ -18,15 +20,15 @@ function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
       saturday: { isActive: false, from: "08:00", to: "17:00" },
       sunday: { isActive: false, from: "08:00", to: "17:00" },
     });
-
+    const [branchId, setBranchId] = useState(null);
     const daysOfWeek = [
-      { key: 'monday', name: 'Понедельник' },
-      { key: 'tuesday', name: 'Вторник' },
-      { key: 'wednesday', name: 'Среда' },
-      { key: 'thursday', name: 'Четверг' },
-      { key: 'friday', name: 'Пятница' },
-      { key: 'saturday', name: 'Суббота' },
-      { key: 'sunday', name: 'Воскресенье' },
+      { key: 'monday', name: 'Понедельник', number: 0 },
+      { key: 'tuesday', name: 'Вторник', number: 1 },
+      { key: 'wednesday', name: 'Среда', number: 2 },
+      { key: 'thursday', name: 'Четверг', number: 3 },
+      { key: 'friday', name: 'Пятница', number: 4 },
+      { key: 'saturday', name: 'Суббота', number: 5 },
+      { key: 'sunday', name: 'Воскресенье', number: 6 },
     ];
 
    const isFormValid = () => {
@@ -41,6 +43,8 @@ function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
         setPositionPhone("");
         setPositionTwoGis("");
         setImage(null);
+        setErrorMessages([]);
+        setPositionTwoGis("");
     };
 
    const updateSchedule = (day, field, value) => {
@@ -52,6 +56,50 @@ function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
         },
       }));
     };
+
+    const handleSubmit = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const formData = new FormData();
+
+        formData.append('title', positionName);
+        formData.append('address', positionAddress);
+        formData.append('phone_number', positionPhone);
+        formData.append('link_to_map', positionTwoGis);
+
+        if (image) {
+          formData.append('image', image);
+        }
+
+        daysOfWeek.forEach(({ key, number }) => {
+          if (schedule[key].isActive) {
+            formData.append(`workdays[${number}][workday]`, number + 1);
+            formData.append(`workdays[${number}][start_time]`, schedule[key].from);
+            formData.append(`workdays[${number}][end_time]`, schedule[key].to);
+          }
+        });
+
+        const response = await axios.post('https://muha-backender.org.kg/branches/create/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+         setBranchId(response.data.id);
+         console.log('Филиал создан успешно:', response.data);
+         resetFields();
+         onClose();
+      } catch (error) {
+        console.error('Ошибка при создании филиала:', error.response ? error.response.data : error);
+        if (error.response) {
+         const messages = Object.entries(error.response.data).map(([key, value]) => `${key}: ${value.join(', ')}`);
+         setErrorMessages(messages);
+        }
+      }
+    };
+
+
 
 
     return (
@@ -115,7 +163,7 @@ function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
 
                   <label className={styles.nameOfInput}>Номер телефона
                       <input
-                          type="number"
+                          type="text"
                           placeholder="Введите номер телефона"
                           value={positionPhone}
                           onChange={e => setPositionPhone(e.target.value)}
@@ -171,13 +219,17 @@ function AddNewBranch({ isVisible , onClose, day, scheduleData }) {
                           </div>
                       </div>
                   ))}
-
+                    {errorMessages.length > 0 && (
+                        <div className={styles.errorMessages}>
+                            {errorMessages.map((msg, index) => <p key={index}>{msg}</p>)}
+                        </div>
+                    )}
                   <div className={styles.buttons}>
                       <button className={styles.cancelButton} onClick={() => {
                             resetFields();
                             onClose();
                         }}>Отмена</button>
-                      <button className={styles.saveButton} disabled={!isFormValid()}>Создать</button>
+                      <button className={styles.saveButton} onClick={handleSubmit} disabled={!isFormValid()}>Создать</button>
                   </div>
               </div>
           </div>

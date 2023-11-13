@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './AddPositionModal.module.css';
 import closeModalImg from "../../../../img/X-black.svg";
 import plusSvg from "../../../../img/Plus-white.svg";
+import openDropdownVector from "../../../../img/dropdownVectorOpen.svg";
+import dropdownVector from "../../../../img/dropdown-vector.svg";
+import axios from "axios";
 
 function AddPositionModal({ isVisible, onClose }) {
   const [positionName, setPositionName] = useState("");
@@ -10,6 +13,43 @@ function AddPositionModal({ isVisible, onClose }) {
   const [branchAllocations, setBranchAllocations] = useState([{ branch: "", amount: "" }]);
   const [errorMessage, setErrorMessage] = useState("");
   const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get('https://muha-backender.org.kg/admin-panel/categories/', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        }
+      });
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Ошибка при получении категорий: ', error);
+    }
+  };
+
+   useEffect(() => {
+    }, [showDropdown]);
+
+   const toggleDropdown = () => {
+        if (!showDropdown) {
+            fetchCategories();
+        }
+        setShowDropdown(!showDropdown);
+    };
+    const handleCategorySelect = (categoryId, categoryName, event) => {
+        event.stopPropagation();
+        setSelectedCategoryId(categoryId); // Сохранение ID категории
+        setSelectedCategory(categoryName); // Сохранение имени для отображения
+        setTimeout(() => setShowDropdown(false), 0);
+    };
+
+
   const addBranchAllocation = () => {
     setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
   };
@@ -101,16 +141,32 @@ function AddPositionModal({ isVisible, onClose }) {
                             </label>
                         </div>
                         <div>
-                            <label className={styles.nameOfInput} htmlFor="">Категория
-                                <select
-                                    value={category}
-                                    onChange={e => setCategory(e.target.value)}
-                                    className={styles.selectInputCategory}
-                                >
-                                    <option value="">Выберите категорию</option>
-                                    <option value="Кофе">Кофе</option>
-                                </select>
-                            </label>
+                            <label className={styles.nameOfInput}>Категория
+                              <div className={styles.dropdown}>
+                                  <button className={`${styles.dropdownButton} ${showDropdown ? styles.dropdownButtonOpen : ''}`} onClick={toggleDropdown}>
+                                        {selectedCategory || "Выберите категорию"}
+                                        <span className={styles.dropdownArrow}>
+                                          <img
+                                            src={showDropdown ? openDropdownVector : dropdownVector}
+                                            alt=""
+                                          />
+                                        </span>
+                                  </button>
+                                  {showDropdown && (
+                                    <div className={styles.dropdownMenu}>
+                                      {categories.map((category) => (
+                                            <div
+                                                className={styles.dropdownItem}
+                                                key={category.id}
+                                                onClick={(event) => handleCategorySelect(category.id, category.name, event)}
+                                            >
+                                                {category.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                  )}
+                              </div>
+                          </label>
                         </div>
                     </div>
                 ))}

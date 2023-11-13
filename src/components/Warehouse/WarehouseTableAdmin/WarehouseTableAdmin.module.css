@@ -1,5 +1,12 @@
-.table {
+.main {
   font-family: Nunito;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.table {
+  border-collapse: collapse;
   margin-top: 1%;
   width: 100%;
 }
@@ -32,26 +39,23 @@
 }
 
 .table tbody td {
-  padding: 20px 30px 20px 0;
+  padding: 27px 30px 27px 0;
   font-size: 18px;
   font-weight: 600;
   height: 86px;
 }
-.table tbody td:not(:last-child) {
+.table tbody td {
   border-bottom: 2px solid #E7E7E7;
   background: #f9f9f9;
 }
 .table tbody td:last-child {
-  margin-left: 20px;
+  padding-left: 20px;
 }
 .table tbody tr td:first-child {
   padding-left: 20px;
   padding-right: 20px;
 }
 .table__branch {
-  display: flex;
-  margin-top: 10px;
-  gap: 30px;
   position: relative;
 }
 .table__branch .dotsIcon {
@@ -67,7 +71,7 @@
   margin-top: 3px;
 }
 .table__hrLine {
-  max-width: 1238px;
+  width: 100%;
   height: 2px;
   background: #171717;
 }

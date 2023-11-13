@@ -43,6 +43,7 @@ const SearchMenuAdmin = () => {
                 <AddPositionModal
                     isVisible={isAddModalVisible}
                     onClose={cancelModal}
+                    options={["Кофе", "Десерты", "Выпечка", "Коктейли", "Чай"]}
                 />
             </div>
         </div>

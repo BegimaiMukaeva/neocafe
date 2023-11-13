@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import styles from './AddPositionModal.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
+import dropdownVector from '../../../img/dropdown-vector.svg';
+import openDropdownVector from '../../../img/dropdownVectorOpen.svg';
 
-function AddPositionModal({ isVisible , onClose }) {
+function AddPositionModal({ isVisible , onClose, options }) {
     const [positionName, setPositionName] = useState("");
     const [description, setDescription] = useState("");
-    const [category, setCategory] = useState("");
     const [image, setImage] = useState(null);
     const [ingredientType, setIngredientType] = useState(""); // Сырье или Готовая продукция
     const [measurement, setMeasurement] = useState("");
@@ -15,6 +17,42 @@ function AddPositionModal({ isVisible , onClose }) {
     const [price, setPrice] = useState("");
     const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
+    const [categories, setCategories] = useState([]); // Состояние для хранения категорий
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get('https://muha-backender.org.kg/admin-panel/categories/', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        }
+      });
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Ошибка при получении категорий: ', error);
+    }
+  };
+
+   useEffect(() => {
+    }, [showDropdown]);
+
+   const toggleDropdown = () => {
+        if (!showDropdown) {
+            fetchCategories();
+        }
+        setShowDropdown(!showDropdown);
+    };
+    const handleCategorySelect = (categoryId, categoryName, event) => {
+        event.stopPropagation();
+        setSelectedCategoryId(categoryId); // Сохранение ID категории
+        setSelectedCategory(categoryName); // Сохранение имени для отображения
+        setTimeout(() => setShowDropdown(false), 0);
+    };
+
 
    const addIngredient = () => {
         const lastIngredient = ingredients[ingredients.length - 1];
@@ -29,20 +67,65 @@ function AddPositionModal({ isVisible , onClose }) {
     };
 
    const isFormValid = () => {
-        if (!positionName || !description || !category || !price) {
+        if (!positionName || !description || !price) {
             return false;
         }
-        for (let ingredient of ingredients) {
-            if (!ingredient.name || !ingredient.amount) {
-                return false;
-            }
-        }
+        // for (let ingredient of ingredients) {
+        //     if (!ingredient.name || !ingredient.amount) {
+        //         return false;
+        //     }
+        // }
         return true;
    };
+
+const handleSubmit = async () => {
+  try {
+    const accessToken = localStorage.getItem('accessToken');
+    const formData = new FormData();
+    formData.append('name', positionName);
+    formData.append('category', parseInt(selectedCategoryId)); // Преобразование ID категории в число
+    formData.append('price', parseFloat(price)); // Убедитесь, что цена имеет правильный формат
+    formData.append('is_available', true);
+
+    if (image) {
+      formData.append('image', image);
+    }
+
+     console.log('Ingredients:', ingredients); // Логирование ингредиентов
+
+    ingredients.forEach((ingredient, index) => {
+      if (ingredient.amount && !isNaN(ingredient.amount)) {
+        formData.append(`composition[${index}][ingredient]`, parseInt(ingredient.id));
+        formData.append(`composition[${index}][quantity]`, parseFloat(ingredient.amount));
+      }
+    });
+
+    // Логирование содержимого formData перед отправкой
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+
+    const response = await axios.post('https://muha-backender.org.kg/admin-panel/items/create/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    console.log('Позиция создана успешно:', response.data);
+  } catch (error) {
+      console.log(error.response.data)
+    console.error('Ошибка при создании позиции:', error.response.data); // Изменено для более точного отображения ошибки
+  }
+};
+
+
+
    const resetFields = () => {
         setPositionName("");
         setDescription("");
-        setCategory("");
+        setSelectedCategory("");
         setImage(null);
         setIngredientType("");
         setMeasurement("");
@@ -111,17 +194,33 @@ function AddPositionModal({ isVisible , onClose }) {
 
 
                   <div className={styles.categoryAndPrice}>
-                      <label className={styles.nameOfInput} htmlFor="">Категория
-                          <select
-                              value={category}
-                              onChange={e => setCategory(e.target.value)}
-                              className={styles.selectInput}
-                          >
-                              <option value="">Выберите категорию</option>
-                              <option value="Кофе">Кофе</option>
-
-                          </select>
+                      <label className={styles.nameOfInput}>Категория
+                          <div className={styles.dropdown}>
+                              <button className={`${styles.dropdownButton} ${showDropdown ? styles.dropdownButtonOpen : ''}`} onClick={toggleDropdown}>
+                                    {selectedCategory || "Выберите категорию"}
+                                    <span className={styles.dropdownArrow}>
+                                      <img
+                                        src={showDropdown ? openDropdownVector : dropdownVector}
+                                        alt=""
+                                      />
+                                    </span>
+                              </button>
+                              {showDropdown && (
+                                <div className={styles.dropdownMenu}>
+                                  {categories.map((category) => (
+                                        <div
+                                            className={styles.dropdownItem}
+                                            key={category.id}
+                                            onClick={(event) => handleCategorySelect(category.id, category.name, event)}
+                                        >
+                                            {category.name}
+                                        </div>
+                                    ))}
+                                </div>
+                              )}
+                          </div>
                       </label>
+
                       <label className={styles.nameOfInput} htmlFor="">Стоимость
                            <input
                               type="number"
@@ -198,7 +297,7 @@ function AddPositionModal({ isVisible , onClose }) {
                             resetFields();
                             onClose();
                         }}>Отмена</button>
-                      <button className={styles.saveButton} disabled={!isFormValid()}>Создать</button>
+                      <button className={styles.saveButton} disabled={!isFormValid()} onClick={handleSubmit}>Создать</button>
                   </div>
               </div>
           </div>
