@@ -6,22 +6,19 @@ import closeModal from "../../../img/X-black.svg";
 const DeleteCategoryModal = ({ isVisible, onClose, categoryName, categoryId }) => {
     const handleSubmit = async () => {
         try {
-            // Извлечение токена доступа из localStorage
             const accessToken = localStorage.getItem('accessToken');
 
             await axios.delete(`https://muha-backender.org.kg/admin-panel/categories/destroy/${categoryId}/`, {
                 headers: {
                     'accept': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
-                    // 'X-CSRFToken': 'ВАШ_CSRF_TOKEN', // Если нужен CSRF токен
                 }
             });
 
             console.log("Категория удалена:", categoryName);
-            onClose(); // Закрыть модальное окно после успешного удаления
+            onClose();
         } catch (error) {
             console.error('Ошибка при удалении категории: ', error);
-            // Обработка ошибок удаления категории
         }
     };
 

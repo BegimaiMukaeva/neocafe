@@ -5,7 +5,7 @@ import trashSimple from '../../../img/TrashSimpleEditDelete.svg';
 import DeleteItemModel from "../DeleteItemModel/DeleteItemModel";
 import EditPositionMenu from '../EditPositionMenu/EditPositionMenu';
 
-const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
+const EditDeleteItemModel = ({ isVisible, onClose, itemId, fetchProducts }) => {
     const modalContentRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,15 +27,15 @@ const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
     const toggleModal = () => {
         setIsModalOpen(true);
     };
-   const handleCancel = () => {
-       setIsModalOpen(false);
-   };
-   const openEditModal = () => {
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+    const openEditModal = () => {
         setIsEditModalOpen(true);
     };
-   const closeEditModal = () => {
-       setIsEditModalOpen(false);
-   };
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+    };
 
 
     return (
@@ -47,16 +47,20 @@ const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
                         Редактировать
                     </button>
                     <EditPositionMenu
-                      isVisible={isEditModalOpen}
-                      onClose={closeEditModal}
+                        isVisible={isEditModalOpen}
+                        onClose={closeEditModal}
+                        itemId={itemId}
+                        fetchProducts={fetchProducts}
                     />
                     <button className={styles.redactorButton} onClick={toggleModal}>
                         <img className={styles.buttonImg} src={trashSimple} alt=""/>
                         Удалить
                     </button>
                     <DeleteItemModel
-                      isVisible={isModalOpen}
-                      onClose={handleCancel}
+                        isVisible={isModalOpen}
+                        onClose={handleCancel}
+                        itemId={itemId}
+                        fetchProducts={fetchProducts}
                     />
                 </div>
             </div>

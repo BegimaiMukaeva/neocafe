@@ -33,9 +33,9 @@ const EmployeesSearchAdmin = () => {
                     <img className={styles.searchIcon} src={searchIcon} alt=""/>
                 </button>
                 <NotificationsAdminPage
-                isVisible={isModalVisible}
-                onClose={handleCancel}
-            />
+                    isVisible={isModalVisible}
+                    onClose={handleCancel}
+                />
             </div>
             <div className={styles.searchMenuInput}>
                 <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />
@@ -49,7 +49,7 @@ const EmployeesSearchAdmin = () => {
                         type="checkbox"
                         className={styles.checkboxDay}
                     />
-                        Фильтр по рейтингу
+                    Фильтр по рейтингу
                 </label>
             </div>
         </div>

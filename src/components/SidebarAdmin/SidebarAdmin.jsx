@@ -11,9 +11,9 @@ const SidebarAdmin = () => {
     const openModal = () => {
         setIsModalOpen(true);
     };
-   const handleCancel = () => {
-       setIsModalOpen(false);
-   };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     return (
         <div className={styles.main}>

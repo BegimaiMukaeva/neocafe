@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import styles from './AddPositionModal.module.css';
 import closeModalImg from "../../../../img/X-black.svg";
 import plusSvg from "../../../../img/Plus-white.svg";
@@ -7,125 +7,308 @@ import dropdownVector from "../../../../img/dropdown-vector.svg";
 import axios from "axios";
 
 function AddPositionModal({ isVisible, onClose }) {
-  const [positionName, setPositionName] = useState("");
-  const [category, setCategory] = useState("");
-  const [positionLimit, setPositionLimit] = useState("");
-  const [branchAllocations, setBranchAllocations] = useState([{ branch: "", amount: "" }]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const [positionName, setPositionName] = useState("");
+    const [positionLimit, setPositionLimit] = useState("");
+    const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
+    const [productCategory, setProductCategory] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showDropdownBranches, setShowDropdownBranches] = useState(false);
+    const [branches, setBranches] = useState([]);
+    const dropdownRef = useRef(null);
+    const dropdownBranchesRef = useRef(null);
+    const [dropdownOpen, setDropdownOpen] = useState({});
 
-  const fetchCategories = async () => {
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get('https://muha-backender.org.kg/admin-panel/categories/', {
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+
+    const fetchBranches = async () => {
+        try {
+            const response = await axios.get('https://muha-backender.org.kg/branches/', {
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                }
+            });
+            setBranches(response.data);
+        } catch (error) {
+            console.error('Ошибка при получении списка филиалов: ', error);
         }
-      });
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Ошибка при получении категорий: ', error);
-    }
-  };
-
-   useEffect(() => {
-    }, [showDropdown]);
-
-   const toggleDropdown = () => {
-        if (!showDropdown) {
-            fetchCategories();
-        }
-        setShowDropdown(!showDropdown);
-    };
-    const handleCategorySelect = (categoryId, categoryName, event) => {
-        event.stopPropagation();
-        setSelectedCategoryId(categoryId); // Сохранение ID категории
-        setSelectedCategory(categoryName); // Сохранение имени для отображения
-        setTimeout(() => setShowDropdown(false), 0);
     };
 
+    useEffect(() => {
+    }, [showDropdownBranches]);
 
-  const addBranchAllocation = () => {
-    setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
-  };
+    useEffect(() => {
+        const handleDocumentClick = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+            if (dropdownBranchesRef.current && !dropdownBranchesRef.current.contains(event.target)) {
+                setShowDropdownBranches(false);
+            }
+        };
 
-  const updateBranchAllocation = (index, field, value) => {
-    const updatedAllocations = [...branchAllocations];
-    updatedAllocations[index][field] = value;
-    setBranchAllocations(updatedAllocations);
-  };
+        document.addEventListener('mousedown', handleDocumentClick);
 
+        return () => {
+            document.removeEventListener('mousedown', handleDocumentClick);
+        };
+    }, []);
 
-  const isFormValid = () => {
-      return positionName && category && positionLimit;
-  };
+    const availableAtBranches = branchAllocations
+        .filter(allocation => allocation.branch && allocation.branch.id && allocation.amount)
+        .map(allocation => ({
+            branch: allocation.branch.id,
+            quantity: Number(allocation.amount)
+        }));
 
+    const handleSubmit = async () => {
+        if (!positionName || !positionLimit || !productCategory) {
+            setErrorMessage("Пожалуйста, заполните все поля.");
+            if (availableAtBranches.length === 0) {
+                setErrorMessage("Необходимо указать филиалы и количество.");
+                return;
+            }
+            return;
+        }
 
-  const resetFields = () => {
-    setPositionName("");
-    setCategory("");
-    setIngredients([{ name: "", amount: "" }]);
-    setPositionLimit("");
-    setBranchAllocations([{ branch: "", amount: "" }]);
-    setErrorMessage("");
-  };
+        // Validate the formatted data.
+        if (availableAtBranches.some(ab => isNaN(ab.branch) || isNaN(ab.quantity))) {
+            setErrorMessage("All branches must have a valid ID and quantity.");
+            return;
+        }
 
+        let postData = {};
+        let url = '';
+        const accessToken = localStorage.getItem('accessToken');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+        };
 
-  const handleSubmit = () => {
-    if (isFormValid()) {
-      console.log("Отправка данных:", { positionName, category, positionLimit, branchAllocations });
-      resetFields();
-      onClose();
-    } else {
-      setErrorMessage("Пожалуйста, заполните все поля.");
-    }
-  };
+        if (productCategory === "Готовая продукция") {
+            postData = {
+                name: positionName,
+                minimal_limit: Number(positionLimit),
+                description: "Описание продукции",
+                price: 120,
+                available_at_branches: availableAtBranches
+            };
+            url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/create/';
+        } else if (productCategory === "Сырье") {
+            const REAL_CATEGORY_ID_FOR_RAW_MATERIAL = 1;
+            postData = {
+                category: REAL_CATEGORY_ID_FOR_RAW_MATERIAL,
+                name: positionName,
+                measurement_unit: 'g',
+                minimal_limit: Number(positionLimit),
+                available_at_branches: availableAtBranches
+            };
+            url = 'https://muha-backender.org.kg/admin-panel/ingredients/create/';
+        }
 
-  return (
-    isVisible && (
-      <div className={styles.modalOverlay}>
-        <div className={styles.modalContainer}>
-          <div className={styles.titleModal}>
-            <h2 className={styles.title}>Новая продукция</h2>
-            <button className={styles.modalCloseButton} onClick={() => {
+        try {
+            const response = await axios.post(url, postData, { headers });
+
+            if (response.status === 201) {
+                console.log('Продукция успешно создана:', response.data);
                 resetFields();
                 onClose();
-            }}>
-              <img src={closeModalImg} alt="Закрыть"/>
-            </button>
-          </div>
+            } else {
+                setErrorMessage("Произошла ошибка при создании продукции.");
+            }
+        } catch (error) {
+            console.error('Ошибка при создании продукции:', error);
+            const errorData = error.response && typeof error.response.data === 'object' ? JSON.stringify(error.response.data, null, 2) : error.response.data || "Произошла ошибка при создании продукции.";
+            setErrorMessage(errorData);
+        }
+    };
 
-         <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
-            <label className={styles.nameOfInput}>Наименование
-                <input
-                    type="text"
-                    placeholder="Название позиции"
-                    value={positionName}
-                    onChange={e => setPositionName(e.target.value)}
-                    className={styles.textInput}
-                />
-            </label>
+    //
+    // const toggleDropdownBranches = () => {
+    //   if (!showDropdownBranches) {
+    //     fetchBranches();
+    //   }
+    //   setShowDropdownBranches(!showDropdownBranches);
+    //   if (showDropdown) {
+    //     setShowDropdown(false);
+    //   }
+    // };
 
-            <div className={styles.categoryAndPrice}>
-                {ingredients.map((ingredient, index) => (
-                    <div key={index} className={styles.categoryAndPrice}>
-                        <div className={styles.compositionOfDish}>
-                            <label className={styles.nameOfInput}  htmlFor="">Кол-во (в гр, мл, л, кг)
+    const toggleDropdownBranch = (index) => {
+        fetchBranches();
+        setDropdownOpen(prevState => ({
+            ...prevState,
+            [index]: !prevState[index],
+        }));
+    };
+
+    useEffect(() => {
+        setDropdownOpen(branchAllocations.reduce((acc, _, index) => ({ ...acc, [index]: false }), {}));
+    }, [branchAllocations]);
+
+    const handleCategorySelect = (category) => {
+        setProductCategory(category);
+        setShowDropdown(false);
+    };
+
+    const handleBranchSelect = (branchId, branchName, index) => {
+        const updatedAllocations = [...branchAllocations];
+        updatedAllocations[index].branch = { id: branchId, name: branchName };
+        setBranchAllocations(updatedAllocations);
+    };
+    const updateBranchQuantity = (index, amount) => {
+        const updatedAllocations = [...branchAllocations];
+        updatedAllocations[index].amount = amount;
+        setBranchAllocations(updatedAllocations);
+    };
+
+
+
+    const addBranchAllocation = () => {
+        setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
+    };
+
+    const updateBranchAllocation = (index, field, value) => {
+        const updatedAllocations = [...branchAllocations];
+        if (field === "branch") {
+            const selectedBranch = branches.find(branch => branch.id === Number(value));
+            updatedAllocations[index].branch = selectedBranch || { id: null, name: '' };
+        } else {
+            updatedAllocations[index][field] = value;
+        }
+        setBranchAllocations(updatedAllocations);
+    };
+
+
+
+    const isFormValid = () => {
+        return positionName && positionLimit;
+    };
+
+
+    const resetFields = () => {
+        setPositionName("");
+        setIngredients([{ name: "", amount: "" }]);
+        setPositionLimit("");
+        setBranchAllocations([{ branch: "", amount: "" }]);
+        setErrorMessage("");
+    };
+
+
+    return (
+        isVisible && (
+            <div className={styles.modalOverlay}>
+                <div className={styles.modalContainer}>
+                    <div className={styles.titleModal}>
+                        <h2 className={styles.title}>Новая продукция</h2>
+                        <button className={styles.modalCloseButton} onClick={() => {
+                            resetFields();
+                            onClose();
+                        }}>
+                            <img src={closeModalImg} alt="Закрыть"/>
+                        </button>
+                    </div>
+
+                    <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
+                    <label className={styles.nameOfInput}>Наименование
+                        <input
+                            type="text"
+                            placeholder="Название позиции"
+                            value={positionName}
+                            onChange={e => setPositionName(e.target.value)}
+                            className={styles.textInput}
+                        />
+                    </label>
+
+                    <div className={styles.category}>
+
+                        {ingredients.map((ingredient, index) => (
+                            <div key={index} className={styles.category}>
+                                <div>
+                                    <label className={styles.nameOfInput}>Категория
+                                        <div className={styles.dropdown}>
+                                            <button
+                                                className={styles.dropdownButton}
+                                                onClick={() => setShowDropdown(!showDropdown)}
+                                            >
+                                                {productCategory || "Выберите категорию"}
+                                                <span className={styles.dropdownArrow}>
+                                    <img src={showDropdownBranches ? openDropdownVector : dropdownVector} alt="" />
+                                  </span>
+                                            </button>
+                                            {showDropdown && (
+                                                <div className={styles.dropdownMenu}>
+                                                    <div
+                                                        className={styles.dropdownItem}
+                                                        onClick={() => handleCategorySelect("Готовая продукция")}
+                                                    >
+                                                        Готовая продукция
+                                                    </div>
+                                                    <div
+                                                        className={styles.dropdownItem}
+                                                        onClick={() => handleCategorySelect("Сырье")}
+                                                    >
+                                                        Сырье
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className={styles.compositionOfDish}>
+                        <label className={styles.nameOfInput}>Минимальный лимит
+                            <input
+                                type="text"
+                                placeholder="Например: 2 кг"
+                                value={positionLimit}
+                                onChange={e => setPositionLimit(e.target.value)}
+                                className={styles.minimalLimit}
+                            />
+                        </label>
+                    </div>
+                    {branchAllocations.map((allocation, index) => (
+                        <div key={index} className={styles.categoryAndPrice}>
+                            <label className={styles.nameOfInput}>Филиалы
+                                <div className={styles.dropdown}>
+                                    <button
+                                        className={`${styles.dropdownButton} ${dropdownOpen[index] ? styles.dropdownButtonOpen : ''}`}
+                                        onClick={() => toggleDropdownBranch(index)} // Измените здесь
+                                    >
+                                        {allocation.branch.name || "Выберите филиал"}
+                                        <span className={styles.dropdownArrow}>
+            <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
+          </span>
+                                    </button>
+                                    {dropdownOpen[index] && ( // И проверьте здесь
+                                        <div className={styles.dropdownMenu}>
+                                            {branches.map((branch) => (
+                                                <div
+                                                    className={styles.dropdownItem}
+                                                    key={branch.id}
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        handleBranchSelect(branch.id, branch.name_of_shop, index);
+                                                        setDropdownOpen(prevState => ({ ...prevState, [index]: false }));
+                                                    }}
+                                                >
+                                                    {branch.name_of_shop}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </label>
+                            <label className={styles.nameOfInput}>Количество
                                 <input
                                     type="number"
-                                    placeholder="Количество"
-                                    value={ingredient.amount}
-                                    onChange={e => {
-                                        const newIngredients = [...ingredients];
-                                        newIngredients[index].amount = e.target.value;
-                                        setIngredients(newIngredients);
-                                    }}
-                                    className={styles.amountInput}
+                                    placeholder="Количество для филиала"
+                                    value={allocation.amount}
+                                    onChange={e => updateBranchQuantity(index, e.target.value)}
+                                    className={styles.amountBranch}
                                 />
                             </label>
                             <label className={styles.nameOfInput}  htmlFor="">Изм-я
@@ -140,90 +323,25 @@ function AddPositionModal({ isVisible, onClose }) {
                                 </select>
                             </label>
                         </div>
-                        <div>
-                            <label className={styles.nameOfInput}>Категория
-                              <div className={styles.dropdown}>
-                                  <button className={`${styles.dropdownButton} ${showDropdown ? styles.dropdownButtonOpen : ''}`} onClick={toggleDropdown}>
-                                        {selectedCategory || "Выберите категорию"}
-                                        <span className={styles.dropdownArrow}>
-                                          <img
-                                            src={showDropdown ? openDropdownVector : dropdownVector}
-                                            alt=""
-                                          />
-                                        </span>
-                                  </button>
-                                  {showDropdown && (
-                                    <div className={styles.dropdownMenu}>
-                                      {categories.map((category) => (
-                                            <div
-                                                className={styles.dropdownItem}
-                                                key={category.id}
-                                                onClick={(event) => handleCategorySelect(category.id, category.name, event)}
-                                            >
-                                                {category.name}
-                                            </div>
-                                        ))}
-                                    </div>
-                                  )}
-                              </div>
-                          </label>
-                        </div>
+                    ))}
+                    <button className={styles.addButton} onClick={addBranchAllocation}>
+                        <img src={plusSvg} alt="Добавить" />
+                        Добавить филиал
+                    </button>
+
+                    {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+
+                    <div className={styles.buttons}>
+                        <button className={styles.cancelButton} onClick={() => {
+                            resetFields();
+                            onClose();
+                        }}>Отмена</button>
+                        <button className={styles.saveButton} disabled={!isFormValid()} onClick={handleSubmit}>Создать</button>
                     </div>
-                ))}
+                </div>
             </div>
-            <div className={styles.compositionOfDish}>
-                <label className={styles.nameOfInput}>Минимальный лимит
-                    <input
-                        type="text"
-                        placeholder="Например: 2 кг"
-                        value={positionLimit}
-                        onChange={e => setPositionLimit(e.target.value)}
-                        className={styles.textInput}
-                    />
-                </label>
-            </div>
-            {branchAllocations.map((allocation, index) => (
-            <div key={index} className={styles.categoryAndPrice}>
-                <label className={styles.nameOfInput}>Филиал
-                    <select
-                        value={allocation.branch}
-                        onChange={e => updateBranchAllocation(index, 'branch', e.target.value)}
-                        className={styles.selectInputBranch}
-                    >
-                        <option value="">Выберите филиал</option>
-                        <option value="Филиал 1">Филиал 1</option>
-                        <option value="Филиал 2">Филиал 2</option>
-                    </select>
-                </label>
-                <label className={styles.nameOfInput}>Количество
-                    <input
-                        type="number"
-                        placeholder="Количество для филиала"
-                        value={allocation.amount}
-                        onChange={e => updateBranchAllocation(index, 'amount', e.target.value)}
-                        className={styles.amountBranch}
-                    />
-                </label>
-            </div>
-            ))}
-            <button className={styles.addButton} onClick={addBranchAllocation}>
-                <img src={plusSvg} alt="Добавить" />
-                Добавить филиал
-            </button>
-
-            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-
-             <div className={styles.buttons}>
-                 <button className={styles.cancelButton} onClick={() => {
-                     resetFields();
-                     onClose();
-                 }}>Отмена</button>
-                 <button className={styles.saveButton} disabled={!isFormValid()}>Создать</button>
-             </div>
-        </div>
-      </div>
-    )
-  );
+        )
+    );
 }
 
 export default AddPositionModal;

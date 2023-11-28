@@ -53,13 +53,8 @@
 .textInput {
     width: 100%;
 }
-.ingredientInput {
-    width: 252px;
-}
-.selectInputCategory {
-    width: 90%;
-}
-.textInput, .ingredientInput, .amountInput, .selectInput, .selectInputCategory, .amountBranch, .selectInputBranch {
+
+.textInput, .amountInput, .selectInput {
     height: 66px;
     padding: 10px;
     margin-bottom: 15px;
@@ -71,19 +66,12 @@
     line-height: 18px;
     outline: none;
 }
-.selectInputBranch{
-    width: 280px;
-}
-.amountInput  {
-    width: 170px;
-}
-.amountBranch {
-    width: 200px;
-}
+
 .nameOfInput {
     font-size: 16px;
     font-weight: 500;
     line-height: 16px;
+    margin-right: 5px;
     color: #C1C1C3;
 }
 .categoryAndPrice {

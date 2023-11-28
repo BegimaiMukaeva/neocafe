@@ -10,72 +10,73 @@ const AddNewCategory = ({ isVisible, onClose }) => {
 
   const handleSubmit = async () => {
     try {
-      // Извлечение токена доступа из localStorage
+      const formData = new FormData();
+      formData.append('name', categoryName);
+      if (image) {
+        formData.append('image', image);
+      }
+
       const accessToken = localStorage.getItem('accessToken');
 
-      await axios.post('https://muha-backender.org.kg/admin-panel/categories/create/', {
-        name: categoryName
-      }, {
+      await axios.post('https://muha-backender.org.kg/admin-panel/categories/create/', formData, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
-          // 'X-CSRFToken': 'ВАШ_CSRF_TOKEN', // Если нужен CSRF токен
         }
       });
 
-      console.log("Категория создана:", categoryName);
-      onClose(); // Закрыть модальное окно после успешного создания
+      console.log("Категория создана:", categoryName, image);
+      onClose();
     } catch (error) {
       console.error('Ошибка при создании категории: ', error);
-      // Обработка ошибок создания категории
     }
   };
 
+
   return (
-    <div className={isVisible ? styles.modalWrapper : styles.modalHidden}>
-      <div className={styles.modalContent}>
-        <div className={styles.cancelButtonCategory}>
-          <h2>Новая категория</h2>
-          <button className={styles.modalCloseButton} onClick={onClose}>
-            <img src={closeModal} alt=""/>
-          </button>
-        </div>
-        <p className={styles.categoryName}>Наименование</p>
-        <input
-          className={styles.categoryInput}
-          type="text" 
-          placeholder="Введите название категории"
-          value={categoryName}
-          onChange={(e) => setCategoryName(e.target.value)}
-        />
-        <div className={styles.imageUpload}>
-          <label htmlFor="imageUpload" className={styles.imageLabel}>
-            Добавьте фотографию
-          </label>
-          <div className={styles.imageBorder}>
-            <div className={styles.imagePreview}>
-              {!image ? (
-                  <img src={productImage} alt="Иконка загрузки" />
-                  ) : (
-                      <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
-                      )}
-                      <p className={styles.imageText}>Перетащите изображение для изменения <br/> или <span className={styles.imageChangeText}>обзор</span></p>
-            </div>
+      <div className={isVisible ? styles.modalWrapper : styles.modalHidden}>
+        <div className={styles.modalContent}>
+          <div className={styles.cancelButtonCategory}>
+            <h2>Новая категория</h2>
+            <button className={styles.modalCloseButton} onClick={onClose}>
+              <img src={closeModal} alt=""/>
+            </button>
           </div>
+          <p className={styles.categoryName}>Наименование</p>
           <input
-              type="file"
-              id="imageUpload"
-              accept=".jpg, .jpeg, .png"
-              onChange={(e) => setImage(e.target.files[0])}
-              className={styles.imageInput}
+              className={styles.categoryInput}
+              type="text"
+              placeholder="Введите название категории"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
           />
-        </div>
-        <div className={styles.buttons}>
-          <button className={styles.cancelButton} onClick={onClose}>Отмена</button>
-          <button className={styles.categoryAddButton} onClick={handleSubmit}>Добавить</button>
+          <div className={styles.imageUpload}>
+            <label htmlFor="imageUpload" className={styles.imageLabel}>
+              Добавьте фотографию
+            </label>
+            <div className={styles.imageBorder}>
+              <div className={styles.imagePreview}>
+                {!image ? (
+                    <img src={productImage} alt="Иконка загрузки" />
+                ) : (
+                    <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
+                )}
+                <p className={styles.imageText}>Перетащите изображение для изменения <br/> или <span className={styles.imageChangeText}>обзор</span></p>
+              </div>
+            </div>
+            <input
+                type="file"
+                id="imageUpload"
+                accept=".jpg, .jpeg, .png"
+                onChange={(e) => setImage(e.target.files[0])}
+                className={styles.imageInput}
+            />
+          </div>
+          <div className={styles.buttons}>
+            <button className={styles.cancelButton} onClick={onClose}>Отмена</button>
+            <button className={styles.categoryAddButton} onClick={handleSubmit}>Добавить</button>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

@@ -5,7 +5,7 @@ import trashSimple from '../../../img/TrashSimpleEditDelete.svg';
 import DeleteStaffModel from "../DeleteStaffModel/DeleteStaffModel";
 import EditStaffModel from '../EditStaffModel/EditStaffModel';
 
-const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
+const EditDeleteItemModel = ({ isVisible, onClose, employeeId }) => {
     const modalContentRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,15 +27,15 @@ const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
     const toggleModal = () => {
         setIsModalOpen(true);
     };
-   const handleCancel = () => {
-       setIsModalOpen(false);
-   };
-   const openEditModal = () => {
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+    const openEditModal = () => {
         setIsEditModalOpen(true);
     };
-   const closeEditModal = () => {
-       setIsEditModalOpen(false);
-   };
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+    };
 
 
     return (
@@ -47,16 +47,18 @@ const EditDeleteItemModel = ({ isVisible, onClose, categoryName }) => {
                         Редактировать
                     </button>
                     <EditStaffModel
-                      isVisible={isEditModalOpen}
-                      onClose={closeEditModal}
+                        isVisible={isEditModalOpen}
+                        onClose={closeEditModal}
+                        employeeId={employeeId}
                     />
                     <button className={styles.redactorButton} onClick={toggleModal}>
                         <img className={styles.buttonImg} src={trashSimple} alt=""/>
                         Удалить
                     </button>
                     <DeleteStaffModel
-                      isVisible={isModalOpen}
-                      onClose={handleCancel}
+                        isVisible={isModalOpen}
+                        onClose={handleCancel}
+                        employeeId={employeeId}
                     />
                 </div>
             </div>

@@ -13,22 +13,22 @@ const ProductsNavigateWarehouse = () => {
     };
 
     const getButtonClass = (tableName) => {
-    let buttonClass = styles.navigateProductButton;
+        let buttonClass = styles.navigateProductButton;
 
-    if (activeTable === tableName) {
-        buttonClass += ` ${styles.navigateProductActiveButton}`;
-    }
+        if (activeTable === tableName) {
+            buttonClass += ` ${styles.navigateProductActiveButton}`;
+        }
 
-    if (tableName === 'endingProducts') {
-        buttonClass += ` ${styles.navigateProductLastButton}`;
-    }
+        if (tableName === 'endingProducts') {
+            buttonClass += ` ${styles.navigateProductLastButton}`;
+        }
 
-    if (activeTable === tableName && tableName === 'endingProducts') {
-        buttonClass += ` ${styles.navigateProductLastButtonActive}`;
-    }
+        if (activeTable === tableName && tableName === 'endingProducts') {
+            buttonClass += ` ${styles.navigateProductLastButtonActive}`;
+        }
 
-    return buttonClass;
-};
+        return buttonClass;
+    };
 
 
     return (

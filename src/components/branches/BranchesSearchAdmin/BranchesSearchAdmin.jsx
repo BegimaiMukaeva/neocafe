@@ -33,9 +33,9 @@ const BranchesSearchAdmin = () => {
                     <img className={styles.searchIcon} src={searchIcon} alt=""/>
                 </button>
                 <NotificationsAdminPage
-                isVisible={isModalVisible}
-                onClose={handleCancel}
-            />
+                    isVisible={isModalVisible}
+                    onClose={handleCancel}
+                />
             </div>
             <div className={styles.searchMenuInput}>
                 <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />

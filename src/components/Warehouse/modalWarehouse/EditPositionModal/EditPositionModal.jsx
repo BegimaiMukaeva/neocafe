@@ -1,142 +1,199 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './EditPositionModal.module.css';
 import closeModalImg from "../../../../img/X-black.svg";
+import axios from "axios";
 
-const staticData = {
-  name: "Latte",
-  category: "Кофе",
-  limit: "10",
-  ingredients: [
-    { name: "Coffee", amount: "50" },
-    { name: "Coffee", amount: "50" },
-    { name: "Milk", amount: "200" }
-  ]
-};
+function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredients, fetchProducts}) {
+    const [positionName, setPositionName] = useState("");
+    const [positionLimit, setPositionLimit] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
-function EditPositionModal({ isVisible, onClose }) {
-  const [positionName, setPositionName] = useState(staticData.name);
-  const [category, setCategory] = useState(staticData.category);
-  const [positionLimit, setPositionLimit] = useState(staticData.limit);
-  const [ingredients, setIngredients] = useState(staticData.ingredients);
-  const [errorMessage, setErrorMessage] = useState("");
+    const isFormValid = () => {
+        return positionName && positionLimit;
+    };
 
-  const isFormValid = () => {
-    return positionName && category && ingredients.every(i => i.name && i.amount);
-  };
 
-  const resetFields = () => {
-    setPositionName(staticData.name);
-    setCategory(staticData.category);
-    setPositionLimit(staticData.limit);
-    setIngredients(staticData.ingredients);
-    setErrorMessage("");
-  };
+// useEffect(() => {
+//   if (itemId) {
+//     const accessToken = localStorage.getItem('accessToken');
+//     axios.get(`https://muha-backender.org.kg/admin-panel/ingredients/${itemId}`, {
+//       headers: {
+//         'Authorization': `Bearer ${accessToken}`
+//       }
+//     })
+//     .then(response => {
+//       setPositionName(response.data.name);
+//         console.log(response.data.name);
+//       setPositionLimit(response.data.minimal_limit);
+//     })
+//     .catch(error => {
+//       console.error('Ошибка при получении данных ингредиента:', error);
+//       // Обработайте ошибку
+//     });
+//   }
+// }, [itemId]);
+    console.log(`Тип элемента: ${itemType}`);
 
-  const handleSubmit = () => {
-    if (isFormValid()) {
-      console.log("Отправка данных:", { positionName, category, ingredients });
-      resetFields();
-      onClose();
-    } else {
-      setErrorMessage("Пожалуйста, заполните все поля.");
-    }
-  };
+    useEffect(() => {
+        if (itemId) {
+            const url = itemType === 'ingredient'
+                ? `https://muha-backender.org.kg/admin-panel/ingredients/${itemId}`
+                : `https://muha-backender.org.kg/admin-panel/ready-made-products/${itemId}`;
 
-  return (
-    isVisible && (
-      <div className={styles.modalOverlay}>
-        <div className={styles.modalContainer}>
-          <div className={styles.titleModal}>
-            <h2 className={styles.title}>Новая продукция</h2>
-            <button className={styles.modalCloseButton} onClick={() => {
-                resetFields();
-                onClose();
-            }}>
-              <img src={closeModalImg} alt="Закрыть"/>
-            </button>
-          </div>
+            console.log(`Запрашиваемый URL: ${url}`);
 
-         <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
-            <label className={styles.nameOfInput}>Наименование
-                <input
-                    type="text"
-                    placeholder="Название позиции"
-                    value={positionName}
-                    onChange={e => setPositionName(e.target.value)}
-                    className={styles.textInput}
-                />
-            </label>
+            axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            })
+                .then(response => {
+                    if (itemType === 'ingredient') {
+                        setPositionName(response.data.name);
+                        setPositionLimit(response.data.minimal_limit);
+                    }
+                    console.log(`Ответ сервера для ${itemType}:`, response.data);
+                    const product = response.data.find(p => p.id === itemId);
+                    if (product) {
+                        setPositionName(product.name);
+                        setPositionLimit(product.minimal_limit);
+                    }
 
-            <div>
-                {ingredients.map((ingredient, index) => (
-                    <div key={index} className={styles.categoryAndPrice}>
-                        <div>
-                            <label className={styles.nameOfInput} htmlFor="">Категория
-                                <select
-                                    value={category}
-                                    onChange={e => setCategory(e.target.value)}
-                                    className={styles.selectInputCategory}
-                                >
-                                    <option value="">Выберите категорию</option>
-                                    <option value="Кофе">Кофе</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div className={styles.compositionOfDish}>
-                            <label className={styles.nameOfInput}  htmlFor="">Кол-во (в гр, мл, л, кг)
-                                <input
-                                    type="number"
-                                    placeholder="Количество"
-                                    value={ingredient.amount}
-                                    onChange={e => {
-                                        const newIngredients = [...ingredients];
-                                        newIngredients[index].amount = e.target.value;
-                                        setIngredients(newIngredients);
-                                    }}
-                                    className={styles.amountInput}
-                                />
-                            </label>
-                            <label className={styles.nameOfInput}  htmlFor="">Изм-я
-                                <select
-                                    className={styles.selectInput}
-                                >
-                                    <option>грамм</option>
-                                    <option>кг</option>
-                                    <option>мл</option>
-                                    <option>литр</option>
-                                    <option>шт</option>
-                                </select>
-                            </label>
-                        </div>
+                })
+                .catch(error => {
+                    console.error(`Ошибка при получении данных для ${itemType}:`, error);
+                });
+        }
+    }, [itemId, itemType]);
+
+
+
+// const handleSubmit = () => {
+//   if (isFormValid()) {
+//     const updatedData = {
+//       name: positionName,
+//       minimal_limit: positionLimit,
+//     };
+//
+//     const accessToken = localStorage.getItem('accessToken');
+//     const headers = {
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${accessToken}`
+//     };
+//
+//     axios.patch(`https://muha-backender.org.kg/admin-panel/ingredients/update/${itemId}/`, updatedData, { headers })
+//       .then(response => {
+//         console.log('Данные успешно обновлены:', response.data);
+//         onClose();
+//         resetFields();
+//         fetchIngredients();
+//       })
+//       .catch(error => {
+//         console.error('Ошибка при обновлении данных:', error);
+//         setErrorMessage("Ошибка при обновлении данных.");
+//       });
+//   } else {
+//     setErrorMessage("Пожалуйста, заполните все поля.");
+//   }
+// };
+    const handleSubmit = () => {
+        if (isFormValid()) {
+            const updatedData = {
+                name: positionName,
+                minimal_limit: positionLimit,
+            };
+
+            const accessToken = localStorage.getItem('accessToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            };
+
+            const url = itemType === 'ingredient'
+                ? `https://muha-backender.org.kg/admin-panel/ingredients/update/${itemId}/`
+                : `https://muha-backender.org.kg/admin-panel/ready-made-products/update/${itemId}/`;
+
+            axios.patch(url, updatedData, { headers })
+                .then(response => {
+                    console.log('Данные успешно обновлены:', response.data);
+                    onClose();
+                    resetFields();
+                    itemType === 'ingredient' ? fetchIngredients() : fetchProducts();
+                })
+                .catch(error => {
+                    console.error('Ошибка при обновлении данных:', error);
+                    setErrorMessage("Ошибка при обновлении данных.");
+                });
+        } else {
+            setErrorMessage("Пожалуйста, заполните все поля.");
+        }
+    };
+
+    const resetFields = () => {
+        setErrorMessage("");
+    };
+
+    return (
+        isVisible && (
+            <div className={styles.modalOverlay}>
+                <div className={styles.modalContainer}>
+                    <div className={styles.titleModal}>
+                        <h2 className={styles.title}>Новая продукция</h2>
+                        <button className={styles.modalCloseButton} onClick={() => {
+                            onClose();
+                        }}>
+                            <img src={closeModalImg} alt="Закрыть"/>
+                        </button>
                     </div>
-                ))}
+
+                    <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
+                    <label className={styles.nameOfInput}>Наименование
+                        <input
+                            type="text"
+                            placeholder="Название позиции"
+                            value={positionName}
+                            onChange={e => setPositionName(e.target.value)}
+                            className={styles.textInput}
+                        />
+                    </label>
+
+                    <div className={styles.compositionOfDish}>
+                        <label className={styles.nameOfInput}>Минимальный лимит
+                            <input
+                                type="text"
+                                placeholder="Например: 2 кг"
+                                value={positionLimit}
+                                onChange={e => setPositionLimit(e.target.value)}
+                                className={styles.textInput}
+                            />
+                        </label>
+                        <label className={styles.nameOfInput}  htmlFor="">Изм-я
+                            <select
+                                className={styles.selectInput}
+                            >
+                                <option>грамм</option>
+                                <option>кг</option>
+                                <option>мл</option>
+                                <option>литр</option>
+                                <option>шт</option>
+                            </select>
+                        </label>
+                    </div>
+
+
+                    {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+
+                    <div className={styles.buttons}>
+                        <button className={styles.cancelButton} onClick={() => {
+                            onClose()
+                            resetFields();
+                        }}>Отмена</button>
+                        <button className={styles.saveButton} disabled={!isFormValid()} onClick={handleSubmit}>Сохранить</button>
+                    </div>
+                </div>
             </div>
-            <div className={styles.compositionOfDish}>
-                <label className={styles.nameOfInput}>Минимальный лимит
-                    <input
-                        type="text"
-                        placeholder="Например: 2 кг"
-                        value={positionLimit}
-                        onChange={e => setPositionLimit(e.target.value)}
-                        className={styles.textInput}
-                    />
-                </label>
-            </div>
-
-
-            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-
-             <div className={styles.buttons}>
-                 <button className={styles.cancelButton} onClick={() => {
-                     resetFields();
-                     onClose();
-                 }}>Отмена</button>
-                 <button className={styles.saveButton} disabled={!isFormValid()}>Сохранить</button>
-             </div>
-        </div>
-      </div>
-    )
-  );
+        )
+    );
 }
 
 export default EditPositionModal;

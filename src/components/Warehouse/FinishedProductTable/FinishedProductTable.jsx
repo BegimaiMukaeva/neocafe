@@ -82,7 +82,7 @@ const FinishedProductTable = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const handleDocumentClick = (event) => {
       if (showDropdown && !event.target.closest(`.${styles.dropdown}`) && !event.target.closest(`.${styles.table__categoryTh}`)) {
         setShowDropdown(false);
@@ -97,52 +97,52 @@ const FinishedProductTable = () => {
   }, [showDropdown, styles.dropdown, styles.table__categoryTh]);
 
   return (
-        <div className={styles.main}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>№</th>
-                <th>Наименование</th>
-                <th>Лимит</th>
-                <th>NeoCafeKarpinka</th>
-                <th>NeoCafeBosteri</th>
-                <th>NeoCafeFilial</th>
+      <div className={styles.main}>
+        <table className={styles.table}>
+          <thead>
+          <tr>
+            <th>№</th>
+            <th>Наименование</th>
+            <th>Лимит</th>
+            <th>NeoCafeKarpinka</th>
+            <th>NeoCafeBosteri</th>
+            <th>NeoCafeFilial</th>
+          </tr>
+          </thead>
+          <td colSpan="6">
+            <div className={styles.table__hrLine}>
+            </div>
+          </td>
+          <tbody>
+          {currentItems.map((item, index) => (
+              <tr key={index}>
+                <td>{item.id}</td>
+                <td>{item.name}</td>
+                <td>{item.limit}</td>
+                <td>{item.NeoCafeKarpinka}</td>
+                <td>{item.NeoCafeBosteri}</td>
+                <td>{item.NeoCafeFilial}</td>
               </tr>
-            </thead>
-            <td colSpan="6">
-              <div className={styles.table__hrLine}>
-              </div>
-            </td>
-            <tbody>
-              {currentItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.id}</td>
-                  <td>{item.name}</td>
-                  <td>{item.limit}</td>
-                  <td>{item.NeoCafeKarpinka}</td>
-                  <td>{item.NeoCafeBosteri}</td>
-                  <td>{item.NeoCafeFilial}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className={styles.paginationContainer}>
-            <button className={styles.leftBtn} onClick={handlePrevClick}>
-              <LeftOutlined />
-            </button>
-            {Array.from({
-              length: Math.ceil(staticData.length / itemsPerPage),
-            }).map((item, index) => (
+          ))}
+          </tbody>
+        </table>
+        <div className={styles.paginationContainer}>
+          <button className={styles.leftBtn} onClick={handlePrevClick}>
+            <LeftOutlined />
+          </button>
+          {Array.from({
+            length: Math.ceil(staticData.length / itemsPerPage),
+          }).map((item, index) => (
               <button className={ index + 1 === currentPage ?  styles.activeNum : undefined} key={index} onClick={() => handlePaginationClick(index + 1)}>
                 {index + 1}
               </button>
-            ))}
-            <button className={styles.rightBtn} onClick={handleNextClick}>
-              <RightOutlined />
-            </button>
-          </div>
+          ))}
+          <button className={styles.rightBtn} onClick={handleNextClick}>
+            <RightOutlined />
+          </button>
         </div>
-    );
+      </div>
+  );
 };
 
 export default FinishedProductTable;

@@ -59,7 +59,7 @@
 .selectInputCategory {
     width: 100%;
 }
-.textInput, .ingredientInput, .amountInput, .selectInput, .selectInputCategory, .amountBranch, .selectInputBranch {
+.textInput, .minimalLimit, .ingredientInput, .amountInput, .selectInput, .selectInputCategory, .amountBranch, .selectInputBranch {
     height: 66px;
     padding: 10px;
     margin-bottom: 15px;
@@ -91,6 +91,9 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+}
+.category, .minimalLimit {
+    width: 250px;
 }
 .compositionOfDish {
     display: flex;
