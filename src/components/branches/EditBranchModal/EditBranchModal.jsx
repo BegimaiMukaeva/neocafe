@@ -10,9 +10,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
     const [positionPhone, setPositionPhone] = useState('');
     const [positionTwoGis, setPositionTwoGis] = useState('');
     const [image, setImage] = useState(null);
-     const [originalSchedule, setOriginalSchedule] = useState({}); // Для хранения исходного графика
-    const [editedSchedule, setEditedSchedule] = useState({});     // Для хранения изменений пользователя
-   const initialSchedule = {
+   const [editedSchedule, setEditedSchedule] = useState({
         monday: { isActive: false, from: '08:00', to: '17:00' },
         tuesday: { isActive: false, from: '08:00', to: '17:00' },
         wednesday: { isActive: false, from: '08:00', to: '17:00' },
@@ -20,9 +18,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
         friday: { isActive: false, from: '08:00', to: '17:00' },
         saturday: { isActive: false, from: '08:00', to: '17:00' },
         sunday: { isActive: false, from: '08:00', to: '17:00' },
-    };
-    const [schedule, setSchedule] = useState(initialSchedule);
-
+    });
     const daysOfWeek = [
         { key: 'monday', name: 'Понедельник' },
         { key: 'tuesday', name: 'Вторник' },
@@ -67,17 +63,19 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
     };
 
     const buildScheduleFromData = (workdays) => {
-        let newSchedule = { ...schedule };
-        workdays.forEach(day => {
-            const dayKey = convertNumberToDayKey(day.workday);
-            newSchedule[dayKey] = {
-                isActive: true,
-                from: day.start_time.slice(0, 5),
-                to: day.end_time.slice(0, 5)
-            };
-        });
-        return newSchedule;
-    };
+    let newSchedule = { ...editedSchedule };
+    workdays.forEach(day => {
+        const dayKey = convertNumberToDayKey(day.workday);
+        newSchedule[dayKey] = {
+            isActive: true,
+            from: day.start_time.slice(0, 5),
+            to: day.end_time.slice(0, 5)
+        };
+    });
+    return newSchedule;
+};
+
+
 
     const convertNumberToDayKey = (number) => {
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -93,65 +91,80 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
         return `+${phoneNumber}`;
     };
 
-
-const handleScheduleChange = (day, field, value) => {
-    setEditedSchedule(prevSchedule => {
-        const updatedSchedule = {
+  const handleScheduleChange = (day, field, value) => {
+        setEditedSchedule(prevSchedule => ({
             ...prevSchedule,
             [day]: {
                 ...prevSchedule[day],
                 [field]: value,
             }
-        };
+        }));
+    };
 
-        console.log(`Updated Schedule for ${day}:`, updatedSchedule);
-        return updatedSchedule;
-    });
-};
 
 useEffect(() => {
     console.log('editedSchedule', editedSchedule);
 }, [editedSchedule]);
 
 
-const saveUpdatedBranchData = async () => {
-     const formattedWorkdays = Object.entries(editedSchedule)
-        .filter(([_, value]) => value.isActive)
-        .map(([key, value]) => ({
-            workday: convertDayToNumber(key),
-            start_time: value.from,
-            end_time: value.to,
-        }));
 
-    console.log("Sending Updated Schedule:", formattedWorkdays);
 
-    const updatedBranchData = {
-        name_of_shop: positionName,
-        address: positionAddress,
-        phone_number: formatPhoneNumber(positionPhone),
-        link_to_map: positionTwoGis,
-        schedule: {
-            workdays: formattedWorkdays
+
+     const saveBranchData = async () => {
+        const branchData = {
+            name_of_shop: positionName,
+            address: positionAddress,
+            phone_number: formatPhoneNumber(positionPhone),
+            link_to_map: positionTwoGis,
+        };
+
+        try {
+            await axios.patch(`https://muha-backender.org.kg/branches/update/${branchId}/`, branchData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+
+            if (image instanceof File) {
+                await saveBranchImage();
+            } else {
+                onClose();
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении данных филиала:', error);
         }
     };
-    console.log("Data to be sent:", formattedWorkdays);
 
-    try {
-        const response = await axios.patch(`https://muha-backender.org.kg/branches/update/${branchId}/`, updatedBranchData, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            }
-        });
-        console.log('Обновленные данные филиала:', response.data);
-        onClose();
-        if (image instanceof File) {
-            await saveBranchImage();
+    const saveBranchSchedule = async () => {
+        const scheduleData = {
+            workdays: Object.entries(editedSchedule)
+                .filter(([_, value]) => value.isActive)
+                .map(([key, value]) => ({
+                    workday: convertDayToNumber(key),
+                    start_time: value.from,
+                    end_time: value.to,
+                })),
+        };
+
+        try {
+            await axios.patch(`https://muha-backender.org.kg/branches/schedule/update/${branchId}/`, scheduleData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+
+            onClose();
+        } catch (error) {
+            console.error('Ошибка при обновлении графика работы филиала:', error);
         }
-    } catch (error) {
-        console.error('Ошибка при обновлении данных филиала:', error);
-    }
-};
+    };
+
+    const saveUpdatedBranchData = async () => {
+        await saveBranchData();
+        await saveBranchSchedule();
+    };
 
 
     const saveBranchImage = async () => {
@@ -173,16 +186,16 @@ const saveUpdatedBranchData = async () => {
     };
 
 
-
-    const updateSchedule = (day, field, value) => {
-        setSchedule(prevSchedule => ({
-            ...prevSchedule,
-            [day]: {
-                ...prevSchedule[day],
-                [field]: value,
-            },
-        }));
-    };
+    //
+    // const updateSchedule = (day, field, value) => {
+    //     setSchedule(prevSchedule => ({
+    //         ...prevSchedule,
+    //         [day]: {
+    //             ...prevSchedule[day],
+    //             [field]: value,
+    //         },
+    //     }));
+    // };
 
 
 

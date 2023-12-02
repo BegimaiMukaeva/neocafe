@@ -13,6 +13,7 @@ const EditDeleteItemModel = ({ isVisible, onClose, itemId, fetchProducts }) => {
     useEffect(() => {
         const handleDocumentClick = (event) => {
             if (isVisible && modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+                fetchProducts();
                 onClose();
             }
         };

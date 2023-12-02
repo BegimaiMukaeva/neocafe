@@ -1,11 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {useDispatch} from "react-redux";
 import styles from '../../branches/AddNewBranch/AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import axios from "axios";
 import openDropdownVector from "../../../img/dropdownVectorOpen.svg";
 import dropdownVector from "../../../img/dropdown-vector.svg";
+import {editStaffAdmin} from "../../../store/staffAdminSlice";
 
 function EditStaffModel({ isVisible , onClose, employeeId }) {
+        const dispatch = useDispatch();
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [positionName, setPositionName] = useState('');
@@ -83,6 +86,8 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
 
 
     const fetchEmployeeData = async (employeeId, branches) => {
+        console.log("Запрашиваемый ID сотрудника:", employeeId);
+
         try {
             const response = await axios.get(`https://muha-backender.org.kg/admin-panel/employees/${employeeId}/`, {
                 headers: {
@@ -108,7 +113,7 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
                     updatedSchedule[dayKey] = {
                         isActive: true,
                         from: day.start_time.slice(0, 5),
-                        to: day.end_time.slice(0, 5),     // Преобразование '17:00:00' в '17:00'
+                        to: day.end_time.slice(0, 5),
                     };
                 }
             });
@@ -139,21 +144,28 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
             branch: parseInt(selectedBranchId),
         };
 
-        try {
-            const response = await axios.patch(`https://muha-backender.org.kg/admin-panel/employees/update/${employeeId}/`, updatedEmployeeData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                }
-            });
-
-            console.log('Обновленные данные сотрудника:', response.data);
-            if (response.status === 200) {
-                await saveUpdatedWorkSchedule();
-            }
-        } catch (error) {
-            console.error('Ошибка при обновлении данных сотрудника:', error.response?.data || error.message);
-        }
+        // try {
+        //     const response = await axios.patch(`https://muha-backender.org.kg/admin-panel/employees/update/${employeeId}/`, updatedEmployeeData, {
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        //         }
+        //     });
+        //
+        //     console.log('Обновленные данные сотрудника:', response.data);
+        //     if (response.status === 200) {
+        //         await saveUpdatedWorkSchedule();
+        //     }
+        // } catch (error) {
+        //     console.error('Ошибка при обновлении данных сотрудника:', error.response?.data || error.message);
+        // }
+        dispatch(editStaffAdmin({ employeeId, updatedEmployeeData }))
+        .then(() => {
+            onClose(); // Закрыть модальное окно после успешного обновления
+        })
+        .catch(error => {
+            console.error('Ошибка при обновлении сотрудника:', error);
+        });
     };
 
 

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchStaff } from '../../../store/staffAdminSlice';
 import styles from "./StaffTablePage.module.css";
 import {
   CaretDownOutlined,
@@ -11,6 +13,8 @@ import axios from "axios";
 
 
 const StaffTablePage = () => {
+  const dispatch = useDispatch();
+  const employees = useSelector(state => state.staffAdmin); // Данные сотрудников из Redux Store
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
@@ -22,10 +26,38 @@ const StaffTablePage = () => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [employees, setEmployees] = useState([]);
+  // const [employees, setEmployees] = useState([]);
 
+
+  // useEffect(() => {
+  //       dispatch(fetchStaff());
+  //   const fetchBranches = async () => {
+  //     try {
+  //       const branchResponse = await axios.get('https://muha-backender.org.kg/branches/', {
+  //         headers: { 'accept': 'application/json' }
+  //       });
+  //       const branchesData = branchResponse.data.map(branch => ({ name: branch.name_of_shop, id: branch.id }));
+  //       setBranches(branchesData);
+  //
+  //       const employeeResponse = await axios.get('https://muha-backender.org.kg/admin-panel/employees/', {
+  //         headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+  //       });
+  //       setEmployees(employeeResponse.data.map(employee => ({
+  //         ...employee,
+  //         position: convertPosition(employee.position),
+  //         branchName: getBranchNameById(employee.branch, branchesData),
+  //         schedule: formatSchedule(employee.schedule.workdays),
+  //       })));
+  //     } catch (error) {
+  //       console.error('Ошибка:', error);
+  //     }
+  //   };
+  //
+  //   fetchBranches();
+  // }, [dispatch]);
 
   useEffect(() => {
+    dispatch(fetchStaff()); // Загружаем сотрудников через Redux action
     const fetchBranches = async () => {
       try {
         const branchResponse = await axios.get('https://muha-backender.org.kg/branches/', {
@@ -33,71 +65,65 @@ const StaffTablePage = () => {
         });
         const branchesData = branchResponse.data.map(branch => ({ name: branch.name_of_shop, id: branch.id }));
         setBranches(branchesData);
-
-        const employeeResponse = await axios.get('https://muha-backender.org.kg/admin-panel/employees/', {
-          headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-        });
-        setEmployees(employeeResponse.data.map(employee => ({
-          ...employee,
-          position: convertPosition(employee.position),
-          branchName: getBranchNameById(employee.branch, branchesData),
-          schedule: formatSchedule(employee.schedule.workdays),
-        })));
       } catch (error) {
         console.error('Ошибка:', error);
       }
     };
-
     fetchBranches();
-  }, []);
+  }, [dispatch]); // Указываем зависимость от dispatch
 
-  const getBranchNameById = (branchId, branchesData) => {
+
+  function getBranchNameById(branchId, branchesData) {
     const branch = branchesData.find(b => b.id === branchId);
     return branch ? branch.name : 'Неизвестный филиал';
-  };
+  }
 
   const handleCategorySelect = (branchName, branchId) => {
     setSelectedCategory(branchName);
     setSelectedBranchId(branchId);
     setShowDropdown(false);
   };
+  //
+  // useEffect(() => {
+  //   const fetchEmployees = async () => {
+  //     try {
+  //       const response = await axios.get('https://muha-backender.org.kg/admin-panel/employees/', {
+  //         headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+  //       });
+  //       setEmployees(response.data.map(employee => ({
+  //         ...employee,
+  //         position: convertPosition(employee.position),
+  //         branchName: getBranchNameById(employee.branch),
+  //         schedule: formatSchedule(employee.schedule.workdays),
+  //       })));
+  //       console.log(response.data)
+  //     } catch (error) {
+  //       console.error('Ошибка при получении списка сотрудников:', error);
+  //     }
+  //   };
+  //
+  //   fetchEmployees();
+  // }, []);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get('https://muha-backender.org.kg/admin-panel/employees/', {
-          headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-        });
-        setEmployees(response.data.map(employee => ({
-          ...employee,
-          position: convertPosition(employee.position),
-          branchName: getBranchNameById(employee.branch),
-          schedule: formatSchedule(employee.schedule.workdays),
-        })));
-        console.log(response.data)
-      } catch (error) {
-        console.error('Ошибка при получении списка сотрудников:', error);
-      }
-    };
+    dispatch(fetchStaff());
+  }, [dispatch]);
 
-    fetchEmployees();
-  }, []);
-
-  const formatSchedule = (workdays) => {
-    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-    return workdays
-        .filter(day => day.start_time && day.end_time)
-        .map(day => dayNames[day.workday - 1])
-        .join(', ');
-  };
-
-  const convertPosition = (position) => {
-    switch(position) {
-      case 'barista': return 'Бармен';
-      case 'waiter': return 'Официант';
-      default: return position;
-    }
-  };
+  // const formatSchedule = (workdays) => {
+  //   const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  //   return workdays
+  //       .filter(day => day.start_time && day.end_time)
+  //       .map(day => dayNames[day.workday - 1])
+  //       .join(', ');
+  // };
+  //
+  // const convertPosition = (position) => {
+  //   switch(position) {
+  //     case 'barista': return 'Бармен';
+  //     case 'waiter': return 'Официант';
+  //     default: return position;
+  //   }
+  // };
 
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
@@ -114,10 +140,11 @@ const StaffTablePage = () => {
   };
 
   const handleNextClick = () => {
-    if (currentPage < Math.ceil(setEmployees.length/ itemsPerPage)) {
+    if (currentPage < Math.ceil(employees.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
+
 
   const openEditDeleteModal = (itemId) => {
     setCurrentItemId(itemId);
@@ -184,7 +211,7 @@ const StaffTablePage = () => {
                 <td>{indexOfFirstItem + index + 1}</td>
                 <td>{employee.first_name}</td>
                 <td>{employee.position}</td>
-                <td>{employee.branchName}</td>
+                <td>{getBranchNameById(employee.branch, branches)}</td>
                 <td>{employee.phone_number}</td>
                 <td>{employee.schedule}</td>
                 <td className={styles.table__branch}>

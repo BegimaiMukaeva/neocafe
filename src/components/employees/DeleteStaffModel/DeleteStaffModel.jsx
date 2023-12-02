@@ -1,22 +1,20 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import styles from "../../branches/DeleteBranchModel/DeleteBranchModel.module.css";
 import closeModal from "../../../img/X-black.svg";
-import axios from "axios";
+import {deleteStaffAdmin} from "../../../store/staffAdminSlice";
 
-const DeleteStaffModel = ({ isVisible, onClose, categoryName, employeeId }) => {
-    const handleSubmit = async () => {
-        try {
-            const response = await axios.delete(`https://muha-backender.org.kg/admin-panel/employees/destroy/${employeeId}/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-            });
-            if (response.status === 200) {
-                console.log("Сотрудник удален:", employeeId);
+const DeleteStaffModel = ({ isVisible, onClose, employeeId }) => {
+    const dispatch = useDispatch();
+
+
+    const handleSubmit = () => {
+        dispatch(deleteStaffAdmin(employeeId))
+            .then(() => {
                 onClose();
-            }
-        } catch (error) {
-            console.error('Ошибка при удалении сотрудника:', error);
-        }
+            });
     };
+
 
     return (
         <div className={isVisible ? styles.modalDeleteWrapper : styles.modalHidden}>

@@ -1,11 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {useDispatch} from "react-redux";
 import styles from '../../branches/AddNewBranch/AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import openDropdownVector from "../../../img/dropdownVectorOpen.svg";
 import dropdownVector from "../../../img/dropdown-vector.svg";
 import axios from "axios";
+import {addNewStaffAdmin} from "../../../store/staffAdminSlice";
 
 function AddNewStaffModel({ isVisible , onClose}) {
+    const dispatch = useDispatch();
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [positionName, setPositionName] = useState("");
@@ -86,49 +89,63 @@ function AddNewStaffModel({ isVisible , onClose}) {
         setDropdownOpen(branchAllocations.reduce((acc, _, index) => ({ ...acc, [index]: false }), {}));
     }, [branchAllocations]);
 
+
     const handleBranchSelect = (branchId, branchName, index) => {
-        setPositionBranch(branchId);
-        setPositionBranch(branchName);
+        setPositionBranch(branchId.toString());
         setShowDropdownBranches(false);
     };
 
 
+
+
     const submitEmployeeData = async () => {
-        try {
-            const accessToken = localStorage.getItem('accessToken');
-            const formattedWorkdays = Object.entries(schedule)
-                .filter(([_, daySchedule]) => daySchedule.isActive)
-                .map(([dayKey, daySchedule]) => ({
-                    workday: convertDayToNumber(dayKey),
-                    start_time: daySchedule.from,
-                    end_time: daySchedule.to
-                }));
+        // try {
+        //     const accessToken = localStorage.getItem('accessToken');
+        const formattedWorkdays = Object.entries(schedule)
+            .filter(([_, daySchedule]) => daySchedule.isActive)
+            .map(([dayKey, daySchedule]) => ({
+                workday: convertDayToNumber(dayKey),
+                start_time: daySchedule.from,
+                end_time: daySchedule.to
+            }));
 
-            const employeeData = {
-                username: login,
-                password: password,
-                first_name: positionName,
-                position: convertPosition(positionJob),
-                birth_date: positionDate,
-                phone_number: formatPhoneNumber(positionPhone),
-                branch: parseInt(positionBranch),
-                workdays: formattedWorkdays
-            };
-
-            const response = await axios.post('https://muha-backender.org.kg/admin-panel/employees/create/', employeeData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                }
+        const employeeData = {
+            username: login,
+            password: password,
+            first_name: positionName,
+            position: convertPosition(positionJob),
+            birth_date: positionDate,
+            phone_number: formatPhoneNumber(positionPhone),
+            branch: positionBranch ? parseInt(positionBranch) : null,
+            workdays: formattedWorkdays
+        };
+        console.log('Отправляемые данные сотрудника:', employeeData);
+        dispatch(addNewStaffAdmin(employeeData))
+            .then(() => {
+                console.log('Сотрудник успешно добавлен');
+                resetFields();
+                onClose();
+            })
+            .catch(error => {
+                console.error('Ошибка при добавлении сотрудника:', error);
             });
-            console.log(employeeData)
-            resetFields();
-            onClose();
-            return response.data;
-        } catch (error) {
-            console.error('Ошибка при создании сотрудника:', error.response.data);
-            return null;
-        }
+
+
+
+        //     const response = await axios.post('https://muha-backender.org.kg/admin-panel/employees/create/', employeeData, {
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer ${accessToken}`
+        //         }
+        //     });
+        //     console.log(employeeData)
+        //     resetFields();
+        //     onClose();
+        //     return response.data;
+        // } catch (error) {
+        //     console.error('Ошибка при создании сотрудника:', error.response.data);
+        //     return null;
+        // }
     };
 
     const formatPhoneNumber = (phoneNumber) => {

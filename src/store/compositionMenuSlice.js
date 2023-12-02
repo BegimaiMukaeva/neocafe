@@ -13,7 +13,7 @@ export const addNewCompositionMenu = createAsyncThunk(
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
-            console.log('addNewCompositionMenu Response:', response.data); // Логирование ответа
+            console.log('addNewCompositionMenu Response:', response.data);
             if (response.data) {
                 dispatch(fetchProducts());
             }
