@@ -123,14 +123,16 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
             console.error('Ошибка при получении данных сотрудника: ', error);
         }
     };
-    useEffect(() => {
-        fetchBranches().then(() => {
-            if (employeeId) {
-                fetchEmployeeData();
-            }
-        });
-    }, [employeeId]);
 
+
+ useEffect(() => {
+    console.log('Запрашиваемый ID сотрудника:', employeeId);
+    if (employeeId) {
+        fetchEmployeeData(employeeId, branches);
+    } else {
+        console.error('ID сотрудника не определен');
+    }
+}, [employeeId]);
 
 
 
@@ -161,11 +163,14 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
         // }
         dispatch(editStaffAdmin({ employeeId, updatedEmployeeData }))
         .then(() => {
-            onClose(); // Закрыть модальное окно после успешного обновления
-        })
-        .catch(error => {
-            console.error('Ошибка при обновлении сотрудника:', error);
-        });
+        return saveUpdatedWorkSchedule();
+    })
+    .then(() => {
+        onClose(); // Закрыть модальное окно после успешного обновления
+    })
+    .catch(error => {
+        console.error('Ошибка при обновлении сотрудника:', error);
+    });
     };
 
 
