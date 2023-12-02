@@ -1,91 +1,191 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import styles from '../AddNewBranch/AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 
-const staticData = {
-    "businessInfo": {
-        "name": "NeoCafe Dezerzhinka",
-        "address": "бульвар Эржанкина, 35",
-        "phone": "996555231234",
-        "zgisLink": "https://zgis.kg/bishkek/geo/7030076198570292"
-    },
-    "workSchedule": {
-        "monday": {
-            "isActive": true,
-            "from": "11:00",
-            "to": "22:00"
-        },
-        "tuesday": {
-            "isActive": true,
-            "from": "11:00",
-            "to": "22:00"
-        },
-        "wednesday": {
-            "isActive": true,
-            "from": "11:00",
-            "to": "22:00"
-        },
-        "thursday": {
-            "isActive": true,
-            "from": "11:00",
-            "to": "22:00"
-        },
-        "friday": {
-            "isActive": true,
-            "from": "11:00",
-            "to": "22:00"
-        },
-        "saturday": {
-            "isActive": false,
-            "from": "08:00",
-            "to": "17:00"
-        },
-        "sunday": {
-            "isActive": false,
-            "from": "08:00",
-            "to": "17:00"
+function EditBranchModal({ isVisible, onClose, branchId }) {
+    const [positionName, setPositionName] = useState('');
+    const [positionAddress, setPositionAddress] = useState('');
+    const [positionPhone, setPositionPhone] = useState('');
+    const [positionTwoGis, setPositionTwoGis] = useState('');
+    const [image, setImage] = useState(null);
+     const [originalSchedule, setOriginalSchedule] = useState({}); // Для хранения исходного графика
+    const [editedSchedule, setEditedSchedule] = useState({});     // Для хранения изменений пользователя
+   const initialSchedule = {
+        monday: { isActive: false, from: '08:00', to: '17:00' },
+        tuesday: { isActive: false, from: '08:00', to: '17:00' },
+        wednesday: { isActive: false, from: '08:00', to: '17:00' },
+        thursday: { isActive: false, from: '08:00', to: '17:00' },
+        friday: { isActive: false, from: '08:00', to: '17:00' },
+        saturday: { isActive: false, from: '08:00', to: '17:00' },
+        sunday: { isActive: false, from: '08:00', to: '17:00' },
+    };
+    const [schedule, setSchedule] = useState(initialSchedule);
+
+    const daysOfWeek = [
+        { key: 'monday', name: 'Понедельник' },
+        { key: 'tuesday', name: 'Вторник' },
+        { key: 'wednesday', name: 'Среда' },
+        { key: 'thursday', name: 'Четверг' },
+        { key: 'friday', name: 'Пятница' },
+        { key: 'saturday', name: 'Суббота' },
+        { key: 'sunday', name: 'Воскресенье' },
+    ];
+
+    useEffect(() => {
+        if (branchId) {
+            fetchBranchData(branchId);
         }
+    }, [branchId]);
+
+    const fetchBranchData = async (id) => {
+        try {
+            const response = await axios.get(`https://muha-backender.org.kg/branches/${id}/`, {
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+
+            const data = response.data;
+            setPositionName(data.name_of_shop);
+            setPositionAddress(data.address);
+            setPositionPhone(parseFloat(data.phone_number));
+            setPositionTwoGis(data.link_to_map);
+            setImage(data.image);
+
+            console.log("Fetched Data:", data);
+
+        const fetchedSchedule = buildScheduleFromData(data.workdays);
+        console.log("Fetched Schedule:", fetchedSchedule);
+
+        setEditedSchedule(fetchedSchedule);
+        } catch (error) {
+            console.error('Ошибка при получении данных филиала:', error);
+        }
+    };
+
+    const buildScheduleFromData = (workdays) => {
+        let newSchedule = { ...schedule };
+        workdays.forEach(day => {
+            const dayKey = convertNumberToDayKey(day.workday);
+            newSchedule[dayKey] = {
+                isActive: true,
+                from: day.start_time.slice(0, 5),
+                to: day.end_time.slice(0, 5)
+            };
+        });
+        return newSchedule;
+    };
+
+    const convertNumberToDayKey = (number) => {
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        return days[number - 1];
+    };
+
+    const convertDayToNumber = (dayKey) => {
+        const days = { monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 7 };
+        return days[dayKey];
+    };
+
+    const formatPhoneNumber = (phoneNumber) => {
+        return `+${phoneNumber}`;
+    };
+
+
+const handleScheduleChange = (day, field, value) => {
+    setEditedSchedule(prevSchedule => {
+        const updatedSchedule = {
+            ...prevSchedule,
+            [day]: {
+                ...prevSchedule[day],
+                [field]: value,
+            }
+        };
+
+        console.log(`Updated Schedule for ${day}:`, updatedSchedule);
+        return updatedSchedule;
+    });
+};
+
+useEffect(() => {
+    console.log('editedSchedule', editedSchedule);
+}, [editedSchedule]);
+
+
+const saveUpdatedBranchData = async () => {
+     const formattedWorkdays = Object.entries(editedSchedule)
+        .filter(([_, value]) => value.isActive)
+        .map(([key, value]) => ({
+            workday: convertDayToNumber(key),
+            start_time: value.from,
+            end_time: value.to,
+        }));
+
+    console.log("Sending Updated Schedule:", formattedWorkdays);
+
+    const updatedBranchData = {
+        name_of_shop: positionName,
+        address: positionAddress,
+        phone_number: formatPhoneNumber(positionPhone),
+        link_to_map: positionTwoGis,
+        schedule: {
+            workdays: formattedWorkdays
+        }
+    };
+    console.log("Data to be sent:", formattedWorkdays);
+
+    try {
+        const response = await axios.patch(`https://muha-backender.org.kg/branches/update/${branchId}/`, updatedBranchData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+        console.log('Обновленные данные филиала:', response.data);
+        onClose();
+        if (image instanceof File) {
+            await saveBranchImage();
+        }
+    } catch (error) {
+        console.error('Ошибка при обновлении данных филиала:', error);
     }
 };
-const daysOfWeek = [
-    { key: 'monday', name: 'Понедельник' },
-    { key: 'tuesday', name: 'Вторник' },
-    { key: 'wednesday', name: 'Среда' },
-    { key: 'thursday', name: 'Четверг' },
-    { key: 'friday', name: 'Пятница' },
-    { key: 'saturday', name: 'Суббота' },
-    { key: 'sunday', name: 'Воскресенье' },
-];
 
 
-function EditBranchModal({ isVisible , onClose }) {
-    const [positionName, setPositionName] = useState(staticData.businessInfo.name);
-    const [positionAddress, setPositionAddress] = useState(staticData.businessInfo.address);
-    const [positionPhone, setPositionPhone] = useState(staticData.businessInfo.phone);
-    const [positionTwoGis, setPositionTwoGis] = useState(staticData.businessInfo.zgisLink);
-    const [image, setImage] = useState(null);
+    const saveBranchImage = async () => {
+        const formData = new FormData();
+        formData.append('image', image);
 
-    const [schedule, setSchedule] = useState(staticData.workSchedule);
+        try {
+            const response = await axios.patch(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            console.log('Обновленное изображение филиала:', response.data);
+            onClose();
+        } catch (error) {
+            console.error('Ошибка при обновлении изображения филиала:', error);
+        }
+    };
+
+
 
     const updateSchedule = (day, field, value) => {
         setSchedule(prevSchedule => ({
             ...prevSchedule,
             [day]: {
                 ...prevSchedule[day],
-                [field]: value
-            }
+                [field]: value,
+            },
         }));
     };
 
-    const resetFields = () => {
-        setPositionName(staticData.businessInfo.name);
-        setPositionAddress(staticData.businessInfo.address);
-        setPositionPhone(staticData.businessInfo.phone);
-        setPositionTwoGis(staticData.businessInfo.zgisLink);
-        setSchedule(staticData.workSchedule);
-        setImage(null);
-    };
+
+
 
     return (
         isVisible && (
@@ -94,7 +194,6 @@ function EditBranchModal({ isVisible , onClose }) {
                     <div className={styles.titleModal}>
                         <h2 className={styles.title}>Редактирование</h2>
                         <button className={styles.modalCloseButton} onClick={() => {
-                            resetFields();
                             onClose();
                         }}>
                             <img src={closeModal} alt=""/>
@@ -110,7 +209,11 @@ function EditBranchModal({ isVisible , onClose }) {
                                 {!image ? (
                                     <img src={productImage} alt="Иконка загрузки" />
                                 ) : (
-                                    <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
+                                    image instanceof File ? (
+                                        <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
+                                    ) : (
+                                        <img src={image} alt="Филиал" />
+                                    )
                                 )}
                                 <p className={styles.imageText}>Перетащите изображение для изменения <br/> или <span className={styles.imageChangeText}>обзор</span></p>
                             </div>
@@ -173,44 +276,42 @@ function EditBranchModal({ isVisible , onClose }) {
                         <p className={styles.dayAndTimeTitle}>Время работы</p>
                     </div>
                     {daysOfWeek.map(({ key, name }) => (
-                        <div key={key} className={styles.scheduleItem}>
-                            <div>
-                                <label className={styles.scheduleCheckbox}>
-                                    {name}
-                                    <input
-                                        type="checkbox"
-                                        checked={schedule[key].isActive}
-                                        onChange={(e) => updateSchedule(key, 'isActive', e.target.checked)}
-                                        className={styles.checkboxDay}
-                                    />
-                                </label>
-                            </div>
-                            <div className={styles.timeInputs}>
+                    <div key={key} className={styles.scheduleItem}>
+                        <div>
+                            <label className={styles.scheduleCheckbox}>
+                                {name}
                                 <input
-                                    type="time"
-                                    value={schedule[key].from}
-                                    disabled={!schedule[key].isActive}
-                                    onChange={(e) => updateSchedule(key, 'from', e.target.value)}
-                                    className={styles.timeInput}
+                                    type="checkbox"
+                                    checked={editedSchedule[key]?.isActive || false}
+                                    onChange={(e) => handleScheduleChange(key, 'isActive', e.target.checked)}
+                                    className={styles.checkboxDay}
                                 />
-                                <span>-</span>
-                                <input
-                                    type="time"
-                                    value={schedule[key].to}
-                                    disabled={!schedule[key].isActive}
-                                    onChange={(e) => updateSchedule(key, 'to', e.target.value)}
-                                    className={styles.timeInput}
-                                />
-                            </div>
+                            </label>
                         </div>
-                    ))}
-
+                        <div className={styles.timeInputs}>
+                            <input
+                                type="time"
+                                value={editedSchedule[key]?.from || ''}
+                                disabled={!editedSchedule[key]?.isActive}
+                                onChange={(e) => handleScheduleChange(key, 'from', e.target.value)}
+                                className={styles.timeInput}
+                            />
+                            <span>-</span>
+                            <input
+                                type="time"
+                                value={editedSchedule[key]?.to || ''}
+                                disabled={!editedSchedule[key]?.isActive}
+                                onChange={(e) => handleScheduleChange(key, 'to', e.target.value)}
+                                className={styles.timeInput}
+                            />
+                        </div>
+                    </div>
+                ))}
                     <div className={styles.buttons}>
                         <button className={styles.cancelButton} onClick={() => {
-                            resetFields();
                             onClose();
                         }}>Отмена</button>
-                        <button className={styles.saveButton} >Создать</button>
+                        <button className={styles.saveButton} onClick={saveUpdatedBranchData}>Сохранить</button>
                     </div>
                 </div>
             </div>

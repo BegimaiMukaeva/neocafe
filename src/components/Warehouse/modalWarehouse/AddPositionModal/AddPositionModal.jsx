@@ -59,7 +59,8 @@ function AddPositionModal({ isVisible, onClose }) {
         .filter(allocation => allocation.branch && allocation.branch.id && allocation.amount)
         .map(allocation => ({
             branch: allocation.branch.id,
-            quantity: Number(allocation.amount)
+            quantity: Number(allocation.amount),
+            minimal_limit: Number(positionLimit),
         }));
 
     const handleSubmit = async () => {
@@ -72,7 +73,6 @@ function AddPositionModal({ isVisible, onClose }) {
             return;
         }
 
-        // Validate the formatted data.
         if (availableAtBranches.some(ab => isNaN(ab.branch) || isNaN(ab.quantity))) {
             setErrorMessage("All branches must have a valid ID and quantity.");
             return;
@@ -89,19 +89,13 @@ function AddPositionModal({ isVisible, onClose }) {
         if (productCategory === "Готовая продукция") {
             postData = {
                 name: positionName,
-                minimal_limit: Number(positionLimit),
-                description: "Описание продукции",
-                price: 120,
                 available_at_branches: availableAtBranches
             };
             url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/create/';
         } else if (productCategory === "Сырье") {
-            const REAL_CATEGORY_ID_FOR_RAW_MATERIAL = 1;
             postData = {
-                category: REAL_CATEGORY_ID_FOR_RAW_MATERIAL,
                 name: positionName,
                 measurement_unit: 'g',
-                minimal_limit: Number(positionLimit),
                 available_at_branches: availableAtBranches
             };
             url = 'https://muha-backender.org.kg/admin-panel/ingredients/create/';
@@ -111,7 +105,7 @@ function AddPositionModal({ isVisible, onClose }) {
             const response = await axios.post(url, postData, { headers });
 
             if (response.status === 201) {
-                console.log('Продукция успешно создана:', response.data);
+                console.log('Продукция успешно создана:', postData);
                 resetFields();
                 onClose();
             } else {
@@ -123,17 +117,6 @@ function AddPositionModal({ isVisible, onClose }) {
             setErrorMessage(errorData);
         }
     };
-
-    //
-    // const toggleDropdownBranches = () => {
-    //   if (!showDropdownBranches) {
-    //     fetchBranches();
-    //   }
-    //   setShowDropdownBranches(!showDropdownBranches);
-    //   if (showDropdown) {
-    //     setShowDropdown(false);
-    //   }
-    // };
 
     const toggleDropdownBranch = (index) => {
         fetchBranches();
@@ -259,19 +242,9 @@ function AddPositionModal({ isVisible, onClose }) {
                             </div>
                         ))}
                     </div>
-                    <div className={styles.compositionOfDish}>
-                        <label className={styles.nameOfInput}>Минимальный лимит
-                            <input
-                                type="text"
-                                placeholder="Например: 2 кг"
-                                value={positionLimit}
-                                onChange={e => setPositionLimit(e.target.value)}
-                                className={styles.minimalLimit}
-                            />
-                        </label>
-                    </div>
                     {branchAllocations.map((allocation, index) => (
-                        <div key={index} className={styles.categoryAndPrice}>
+                        <div key={index}>
+                            <div  className={styles.categoryAndPrice}>
                             <label className={styles.nameOfInput}>Филиалы
                                 <div className={styles.dropdown}>
                                     <button
@@ -280,10 +253,10 @@ function AddPositionModal({ isVisible, onClose }) {
                                     >
                                         {allocation.branch.name || "Выберите филиал"}
                                         <span className={styles.dropdownArrow}>
-            <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
-          </span>
+                                            <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
+                                        </span>
                                     </button>
-                                    {dropdownOpen[index] && ( // И проверьте здесь
+                                    {dropdownOpen[index] && (
                                         <div className={styles.dropdownMenu}>
                                             {branches.map((branch) => (
                                                 <div
@@ -308,10 +281,21 @@ function AddPositionModal({ isVisible, onClose }) {
                                     placeholder="Количество для филиала"
                                     value={allocation.amount}
                                     onChange={e => updateBranchQuantity(index, e.target.value)}
-                                    className={styles.amountBranch}
+                                        className={styles.amountBranch}
                                 />
                             </label>
-                            <label className={styles.nameOfInput}  htmlFor="">Изм-я
+                            </div>
+                            <div className={styles.compositionOfDish}>
+                                <label className={styles.nameOfInput}>Минимальный лимит
+                                    <input
+                                        type="text"
+                                        placeholder="Например: 2 кг"
+                                        value={positionLimit}
+                                        onChange={e => setPositionLimit(e.target.value)}
+                                        className={styles.minimalLimit}
+                                    />
+                                </label>
+                                <label className={styles.nameOfInput}  htmlFor="">Изм-я
                                 <select
                                     className={styles.selectInput}
                                 >
@@ -322,6 +306,7 @@ function AddPositionModal({ isVisible, onClose }) {
                                     <option>шт</option>
                                 </select>
                             </label>
+                            </div>
                         </div>
                     ))}
                     <button className={styles.addButton} onClick={addBranchAllocation}>
@@ -329,7 +314,7 @@ function AddPositionModal({ isVisible, onClose }) {
                         Добавить филиал
                     </button>
 
-                    {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+                    {/*{errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}*/}
 
                     <div className={styles.buttons}>
                         <button className={styles.cancelButton} onClick={() => {

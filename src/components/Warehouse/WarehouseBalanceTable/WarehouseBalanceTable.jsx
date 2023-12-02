@@ -1,70 +1,73 @@
 import React, { useState, useEffect } from "react";
 import styles from "./WarehouseBalanceTable.module.css";
 import {
+  CaretDownOutlined,
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
+import axios from "axios";
 
-const staticData = [
-  {
-    id: '№1',
-    name: 'Круассан',
-    NeoCafeDzerzhinka: '20 шт',
-    NeoCafeKarpinka: '20 шт',
-    NeoCafeBosteri: '10 шт',
-    NeoCafeFilial: '0'
-  },
-  {
-    id: '№2',
-    name: 'Булочка с корицей',
-    NeoCafeDzerzhinka: '0 шт',
-    NeoCafeKarpinka: '10 шт',
-    NeoCafeBosteri: '20 шт',
-    NeoCafeFilial: '0'
-  },
-  {
-    id: '№3',
-    name: 'Шарлотка с яблоком',
-    NeoCafeDzerzhinka: '20 шт',
-    NeoCafeKarpinka: '10 шт',
-    NeoCafeBosteri: '15 шт',
-    NeoCafeFilial: '0'
-  },
-  {
-    id: '№4',
-    name: 'Сырные крекеры',
-    NeoCafeDzerzhinka: '20 шт',
-    NeoCafeKarpinka: '10 шт',
-    NeoCafeBosteri: '12 шт',
-    NeoCafeFilial: '0'
-  },
-  {
-    id: '№5',
-    name: 'Чизкейк',
-    NeoCafeDzerzhinka: '30 шт',
-    NeoCafeKarpinka: '10 шт',
-    NeoCafeBosteri: '13 шт',
-    NeoCafeFilial: '0'
-  },
-  {
-    id: '№6',
-    name: 'Брауни',
-    NeoCafeDzerzhinka: '10 шт',
-    NeoCafeKarpinka: '20 шт',
-    NeoCafeBosteri: '0',
-    NeoCafeFilial: '0'
-  }
-];
 
 
 const WarehouseBalanceTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  const [branches, setBranches] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = staticData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = lowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
+
+
+   useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const branchResponse = await axios.get('https://muha-backender.org.kg/branches/', {
+          headers: { 'accept': 'application/json' }
+        });
+        const branchesData = branchResponse.data.map(branch => ({ name: branch.name_of_shop, id: branch.id }));
+        setBranches(branchesData);
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
+    };
+
+    fetchBranches();
+  }, []);
+
+   useEffect(() => {
+    if (selectedBranchId) {
+      fetchLowStockProducts(selectedBranchId);
+    }
+  }, [selectedBranchId]);
+
+
+   const fetchLowStockProducts = async (branchId) => {
+    try {
+      const response = await axios.get(`https://muha-backender.org.kg/admin-panel/ingredient-quantity-in-branch/${branchId}/`, {
+        headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+      setLowStockProducts(response.data);
+      console.log(response.data)
+    } catch (error) {
+      console.error('Ошибка при получении данных о заканчивающихся продуктах:', error);
+    }
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handleCategorySelect = (branchName, branchId) => {
+    setSelectedCategory(branchName);
+    setSelectedBranchId(branchId);
+    setShowDropdown(false);
+  };
 
   const handlePaginationClick = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -77,7 +80,7 @@ const WarehouseBalanceTable = () => {
   };
 
   const handleNextClick = () => {
-    if (currentPage < Math.ceil(staticData.length/ itemsPerPage)) {
+    if (currentPage < Math.ceil(lowStockProducts.length/ itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -103,10 +106,25 @@ const WarehouseBalanceTable = () => {
           <tr>
             <th>№</th>
             <th>Наименование</th>
-            <th>NeoCafeDzerzhinka</th>
-            <th>NeoCafeKarpinka</th>
-            <th>NeoCafeBosteri</th>
-            <th>NeoCafeFilial</th>
+            <th className={styles.table__categoryTh}>
+              {selectedCategory || "Выберите филиал"}
+              <span onClick={toggleDropdown}>
+                    <CaretDownOutlined className={styles.table__caretDown}/>
+                  </span>
+              {showDropdown && (
+                  <div className={styles.dropdown}>
+                    {branches.map((branch) => (
+                        <div
+                            className={styles.menuCategory}
+                            key={branch.id}
+                            onClick={() => handleCategorySelect(branch.name, branch.id)}
+                        >
+                          {branch.name}
+                        </div>
+                    ))}
+                  </div>
+              )}
+            </th>
           </tr>
           </thead>
           <td colSpan="6">
@@ -116,12 +134,9 @@ const WarehouseBalanceTable = () => {
           <tbody>
           {currentItems.map((item, index) => (
               <tr key={index}>
-                <td>{item.id}</td>
-                <td>{item.name}</td>
-                <td>{item.NeoCafeDzerzhinka}</td>
-                <td>{item.NeoCafeKarpinka}</td>
-                <td>{item.NeoCafeBosteri}</td>
-                <td>{item.NeoCafeFilial}</td>
+                <td>{index + 1 + indexOfFirstItem}</td>
+                <td>{item.ingredient}</td>
+                <td>{item.quantity} {item.ingredient.measurement_unit}</td>
               </tr>
           ))}
           </tbody>
@@ -131,7 +146,7 @@ const WarehouseBalanceTable = () => {
             <LeftOutlined />
           </button>
           {Array.from({
-            length: Math.ceil(staticData.length / itemsPerPage),
+            length: Math.ceil(lowStockProducts.length / itemsPerPage),
           }).map((item, index) => (
               <button className={ index + 1 === currentPage ?  styles.activeNum : undefined} key={index} onClick={() => handlePaginationClick(index + 1)}>
                 {index + 1}

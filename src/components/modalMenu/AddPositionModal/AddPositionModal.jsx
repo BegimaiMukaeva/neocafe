@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useDispatch} from "react-redux";
 import axios from 'axios';
 import styles from './AddPositionModal.module.css';
 import closeModal from "../../../img/X-black.svg";
@@ -6,6 +7,7 @@ import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
 import dropdownVector from '../../../img/dropdown-vector.svg';
 import openDropdownVector from '../../../img/dropdownVectorOpen.svg';
+import {addNewCompositionMenu} from "../../../store/compositionMenuSlice";
 
 function AddPositionModal({ isVisible, onClose, options }) {
     const [positionName, setPositionName] = useState("");
@@ -19,6 +21,7 @@ function AddPositionModal({ isVisible, onClose, options }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [availableIngredients, setAvailableIngredients] = useState([]);
+    const dispatch = useDispatch();
 
     const fetchAvailableIngredients = async () => {
         try {
@@ -128,21 +131,10 @@ function AddPositionModal({ isVisible, onClose, options }) {
         };
         console.log('Отправляемые данные для создания позиции:', data);
 
-        try {
-            const accessToken = localStorage.getItem('accessToken');
 
-            const response = await axios.post('https://muha-backender.org.kg/admin-panel/items/create/', JSON.stringify(data), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                }
-            });
-            return response.data.id;
-        } catch (error) {
-            console.error('Ошибка при создании позиции:', error.response.data);
-            return null;
-        }
-    };
+        dispatch(addNewCompositionMenu(data));
+
+    }
 
     const uploadImage = async (positionId) => {
         const formData = new FormData();

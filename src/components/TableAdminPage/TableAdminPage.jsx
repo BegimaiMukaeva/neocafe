@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
+import { setProducts } from '../../store/compositionMenuSlice';
 import styles from "./TableAdminPage.module.css";
 import {
     CaretDownOutlined,
@@ -14,9 +16,11 @@ import EditDeleteItemModel from '../modalMenu/EditDeleteItemModel/EditDeleteItem
 
 
 const TableAdminPage = () => {
-    const [products, setProducts] = useState([]);
+
+    const dispatch = useDispatch();
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
+    const products = useSelector(state => state.compositionMenu);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("");
@@ -33,6 +37,7 @@ const TableAdminPage = () => {
     const [categoryIdToDelete, setCategoryIdToDelete] = useState(null);
     const [categoryNameToDelete, setCategoryNameToDelete] = useState('');
     const [availableIngredients, setAvailableIngredients] = useState([]);
+
 
     const fetchAvailableIngredients = async () => {
         try {
@@ -73,7 +78,7 @@ const TableAdminPage = () => {
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
-            setProducts(response.data);
+            dispatch(setProducts(response.data));
         } catch (error) {
             console.error('Ошибка при получении продуктов:', error);
         }
@@ -91,6 +96,10 @@ const TableAdminPage = () => {
     useEffect(() => {
     }, [availableIngredients]);
 
+
+    useEffect(() => {
+        console.log('Текущие продукты в компоненте:', products);
+    }, [products]);
 
     const getCompositionString = (composition) => {
 

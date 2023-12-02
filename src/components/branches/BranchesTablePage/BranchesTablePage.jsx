@@ -129,9 +129,9 @@ const BranchesTablePage = () => {
                     </div>
                 </td>
                 <tbody>
-                {branches.slice(indexOfFirstItem, indexOfLastItem).map((branch)  => (
+                {branches.slice(indexOfFirstItem, indexOfLastItem).map((branch, index) => (
                     <tr key={branch.id}>
-                        <td>{branch.id}</td>
+                        <td>{indexOfFirstItem + index + 1}</td>
                         <td>{branch.name_of_shop}</td>
                         <td>{branch.address}</td>
                         <td>

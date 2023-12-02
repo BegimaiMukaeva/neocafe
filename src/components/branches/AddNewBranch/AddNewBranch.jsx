@@ -76,7 +76,7 @@ function AddNewBranch({ isVisible , onClose }) {
                 phone_number: positionPhone,
                 link_to_map: positionTwoGis,
                 workdays: daysOfWeek.map(({ key, number }) => ({
-                    workday: schedule[key].isActive ? number + 1 : null,
+                    workday: schedule[key].isActive ? number + 1 :   null,
                     start_time: schedule[key].isActive ? schedule[key].from : null,
                     end_time: schedule[key].isActive ? schedule[key].to : null
                 })).filter(day => day.workday !== null)

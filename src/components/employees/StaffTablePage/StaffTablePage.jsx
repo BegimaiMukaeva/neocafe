@@ -179,9 +179,9 @@ const StaffTablePage = () => {
             </div>
           </td>
           <tbody>
-          {employees.slice(indexOfFirstItem, indexOfLastItem).map((employee) => (
+          {employees.slice(indexOfFirstItem, indexOfLastItem).map((employee, index) => (
               <tr key={employee.id}>
-                <td>{employee.id}</td>
+                <td>{indexOfFirstItem + index + 1}</td>
                 <td>{employee.first_name}</td>
                 <td>{employee.position}</td>
                 <td>{employee.branchName}</td>

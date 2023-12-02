@@ -76,7 +76,7 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
             return response.data;
         } catch (error) {
             console.error('Ошибка при получении списка филиалов: ', error);
-            throw error; // Передаем ошибку дальше
+            throw error;
         }
     };
 
@@ -114,9 +114,6 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
             });
 
             setSchedule(updatedSchedule);
-
-
-
         } catch (error) {
             console.error('Ошибка при получении данных сотрудника: ', error);
         }

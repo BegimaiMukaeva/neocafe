@@ -5,11 +5,10 @@ import axios from "axios";
 
 function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredients, fetchProducts}) {
     const [positionName, setPositionName] = useState("");
-    const [positionLimit, setPositionLimit] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
     const isFormValid = () => {
-        return positionName && positionLimit;
+        return positionName;
     };
 
 
@@ -50,13 +49,11 @@ function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredie
                 .then(response => {
                     if (itemType === 'ingredient') {
                         setPositionName(response.data.name);
-                        setPositionLimit(response.data.minimal_limit);
                     }
                     console.log(`Ответ сервера для ${itemType}:`, response.data);
                     const product = response.data.find(p => p.id === itemId);
                     if (product) {
                         setPositionName(product.name);
-                        setPositionLimit(product.minimal_limit);
                     }
 
                 })
@@ -100,7 +97,6 @@ function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredie
         if (isFormValid()) {
             const updatedData = {
                 name: positionName,
-                minimal_limit: positionLimit,
             };
 
             const accessToken = localStorage.getItem('accessToken');
@@ -156,30 +152,6 @@ function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredie
                             className={styles.textInput}
                         />
                     </label>
-
-                    <div className={styles.compositionOfDish}>
-                        <label className={styles.nameOfInput}>Минимальный лимит
-                            <input
-                                type="text"
-                                placeholder="Например: 2 кг"
-                                value={positionLimit}
-                                onChange={e => setPositionLimit(e.target.value)}
-                                className={styles.textInput}
-                            />
-                        </label>
-                        <label className={styles.nameOfInput}  htmlFor="">Изм-я
-                            <select
-                                className={styles.selectInput}
-                            >
-                                <option>грамм</option>
-                                <option>кг</option>
-                                <option>мл</option>
-                                <option>литр</option>
-                                <option>шт</option>
-                            </select>
-                        </label>
-                    </div>
-
 
                     {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
 

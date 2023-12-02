@@ -243,10 +243,13 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
                                 {!image ? (
                                     <img src={productImage} alt="Иконка загрузки" />
                                 ) : (
-                                    image instanceof File || image instanceof Blob ?
-                                        <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" /> :
+                                    image instanceof File ? (
+                                        <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
+                                    ) : (
                                         <img src={image} alt="Предварительный просмотр" />
+                                    )
                                 )}
+                                <p className={styles.imageText}>Перетащите изображение для изменения <br/> или <span className={styles.imageChangeText}>обзор</span></p>
                             </div>
                         </div>
                         <input

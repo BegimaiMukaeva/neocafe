@@ -79,7 +79,6 @@ const CompositionTableSecond = () => {
             <th>№</th>
             <th>Наименование</th>
             <th>Количество</th>
-            <th>Лимит</th>
             <th>Дата прихода</th>
           </tr>
           </thead>
@@ -89,7 +88,6 @@ const CompositionTableSecond = () => {
                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{ingredient.name}</td>
                 <td>{`${ingredient.total_quantity}`}</td>
-                <td>{ingredient.minimal_limit}</td>
                 <td>{ingredient.date_of_arrival}</td>
                 <td className={styles.table__branch}>
                   <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(ingredient.id)}/>

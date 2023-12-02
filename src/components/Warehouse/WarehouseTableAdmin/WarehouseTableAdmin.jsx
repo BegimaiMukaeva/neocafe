@@ -80,7 +80,6 @@ const WarehouseTableAdmin = () => {
             <th>№</th>
             <th>Наименование</th>
             <th>Количество</th>
-            <th>Лимит</th>
             <th>Дата прихода</th>
           </tr>
           </thead>
@@ -90,7 +89,6 @@ const WarehouseTableAdmin = () => {
                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{product.name}</td>
                 <td>{product.total_quantity}</td>
-                <td>{product.minimal_limit}</td>
                 <td>{product.date_of_arrival}</td>
                 <td className={styles.table__branch}>
                   <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(product.id)}/>
