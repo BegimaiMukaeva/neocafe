@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from 'react-redux';
+import {fetchBranches} from "../../../store/branchesAdminSlice";
 import styles from "./BranchesTablePage.module.css";
 import {
     LeftOutlined,
@@ -10,7 +11,9 @@ import EditDeleteItemModel from '../EditDeleteItemModel/EditDeleteItemModel';
 
 
 const BranchesTablePage = () => {
-    const [branches, setBranches] = useState([]);
+    const dispatch = useDispatch();
+    const branches = useSelector((state) => state.branchesAdmin.branches);
+    // const [branches, setBranches] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
 
@@ -18,22 +21,21 @@ const BranchesTablePage = () => {
     const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
 
-    const fetchBranches = async () => {
-        try {
-            const response = await axios.get('https://muha-backender.org.kg/branches/', {
-                headers: {
-                    'accept': 'application/json',
-                }
-            });
-            setBranches(response.data);
-        } catch (error) {
-            console.error('Ошибка при получении данных о филиалах:', error);
-        }
-    };
-
+    // const fetchBranches = async () => {
+    //     try {
+    //         const response = await axios.get('https://muha-backender.org.kg/branches/', {
+    //             headers: {
+    //                 'accept': 'application/json',
+    //             }
+    //         });
+    //         setBranches(response.data);
+    //     } catch (error) {
+    //         console.error('Ошибка при получении данных о филиалах:', error);
+    //     }
+    // };
     useEffect(() => {
-        fetchBranches();
-    }, []);
+        dispatch(fetchBranches());
+        }, [dispatch]);
 
 
     const handlePaginationClick = (pageNumber) => {
@@ -47,7 +49,7 @@ const BranchesTablePage = () => {
     };
 
     const handleNextClick = () => {
-        if (currentPage < Math.ceil(setBranches.length/ itemsPerPage)) {
+        if (currentPage < Math.ceil(branches.length/ itemsPerPage)) {
             setCurrentPage(currentPage + 1);
         }
     };

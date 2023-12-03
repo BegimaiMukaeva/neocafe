@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { editBranch } from '../../../store/branchesAdminSlice';
 import styles from '../AddNewBranch/AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 
 function EditBranchModal({ isVisible, onClose, branchId }) {
+    const dispatch = useDispatch();
     const [positionName, setPositionName] = useState('');
     const [positionAddress, setPositionAddress] = useState('');
     const [positionPhone, setPositionPhone] = useState('');
     const [positionTwoGis, setPositionTwoGis] = useState('');
     const [image, setImage] = useState(null);
-   const [editedSchedule, setEditedSchedule] = useState({
+    const [editedSchedule, setEditedSchedule] = useState({
         monday: { isActive: false, from: '08:00', to: '17:00' },
         tuesday: { isActive: false, from: '08:00', to: '17:00' },
         wednesday: { isActive: false, from: '08:00', to: '17:00' },
@@ -53,29 +56,27 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
 
             console.log("Fetched Data:", data);
 
-        const fetchedSchedule = buildScheduleFromData(data.workdays);
-        console.log("Fetched Schedule:", fetchedSchedule);
+            const fetchedSchedule = buildScheduleFromData(data.workdays);
+            console.log("Fetched Schedule:", fetchedSchedule);
 
-        setEditedSchedule(fetchedSchedule);
+            setEditedSchedule(fetchedSchedule);
         } catch (error) {
             console.error('Ошибка при получении данных филиала:', error);
         }
     };
 
     const buildScheduleFromData = (workdays) => {
-    let newSchedule = { ...editedSchedule };
-    workdays.forEach(day => {
-        const dayKey = convertNumberToDayKey(day.workday);
-        newSchedule[dayKey] = {
-            isActive: true,
-            from: day.start_time.slice(0, 5),
-            to: day.end_time.slice(0, 5)
-        };
-    });
-    return newSchedule;
-};
-
-
+        let newSchedule = { ...editedSchedule };
+        workdays.forEach(day => {
+            const dayKey = convertNumberToDayKey(day.workday);
+            newSchedule[dayKey] = {
+                isActive: true,
+                from: day.start_time.slice(0, 5),
+                to: day.end_time.slice(0, 5)
+            };
+        });
+        return newSchedule;
+    };
 
     const convertNumberToDayKey = (number) => {
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -91,7 +92,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
         return `+${phoneNumber}`;
     };
 
-  const handleScheduleChange = (day, field, value) => {
+    const handleScheduleChange = (day, field, value) => {
         setEditedSchedule(prevSchedule => ({
             ...prevSchedule,
             [day]: {
@@ -102,39 +103,30 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
     };
 
 
-useEffect(() => {
-    console.log('editedSchedule', editedSchedule);
-}, [editedSchedule]);
+    useEffect(() => {
+        console.log('editedSchedule', editedSchedule);
+    }, [editedSchedule]);
 
 
 
 
 
-     const saveBranchData = async () => {
-        const branchData = {
+    const saveBranchData = async () => {
+        const updatedData = {
             name_of_shop: positionName,
             address: positionAddress,
             phone_number: formatPhoneNumber(positionPhone),
             link_to_map: positionTwoGis,
         };
-
-        try {
-            await axios.patch(`https://muha-backender.org.kg/branches/update/${branchId}/`, branchData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                }
-            });
-
-            if (image instanceof File) {
-                await saveBranchImage();
-            } else {
+        dispatch(editBranch({ branchId, updatedData }))
+            .then(() => {
                 onClose();
-            }
-        } catch (error) {
-            console.error('Ошибка при обновлении данных филиала:', error);
-        }
+            })
+            .catch(error => {
+                console.error('Ошибка при редактировании филиала:', error);
+            });
     };
+
 
     const saveBranchSchedule = async () => {
         const scheduleData = {
@@ -164,7 +156,9 @@ useEffect(() => {
     const saveUpdatedBranchData = async () => {
         await saveBranchData();
         await saveBranchSchedule();
+        await saveBranchImage();
     };
+
 
 
     const saveBranchImage = async () => {
@@ -172,33 +166,17 @@ useEffect(() => {
         formData.append('image', image);
 
         try {
-            const response = await axios.patch(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
+            await axios.patch(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                }
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                },
             });
-            console.log('Обновленное изображение филиала:', response.data);
             onClose();
         } catch (error) {
             console.error('Ошибка при обновлении изображения филиала:', error);
         }
     };
-
-
-    //
-    // const updateSchedule = (day, field, value) => {
-    //     setSchedule(prevSchedule => ({
-    //         ...prevSchedule,
-    //         [day]: {
-    //             ...prevSchedule[day],
-    //             [field]: value,
-    //         },
-    //     }));
-    // };
-
-
-
 
     return (
         isVisible && (
@@ -289,37 +267,37 @@ useEffect(() => {
                         <p className={styles.dayAndTimeTitle}>Время работы</p>
                     </div>
                     {daysOfWeek.map(({ key, name }) => (
-                    <div key={key} className={styles.scheduleItem}>
-                        <div>
-                            <label className={styles.scheduleCheckbox}>
-                                {name}
+                        <div key={key} className={styles.scheduleItem}>
+                            <div>
+                                <label className={styles.scheduleCheckbox}>
+                                    {name}
+                                    <input
+                                        type="checkbox"
+                                        checked={editedSchedule[key]?.isActive || false}
+                                        onChange={(e) => handleScheduleChange(key, 'isActive', e.target.checked)}
+                                        className={styles.checkboxDay}
+                                    />
+                                </label>
+                            </div>
+                            <div className={styles.timeInputs}>
                                 <input
-                                    type="checkbox"
-                                    checked={editedSchedule[key]?.isActive || false}
-                                    onChange={(e) => handleScheduleChange(key, 'isActive', e.target.checked)}
-                                    className={styles.checkboxDay}
+                                    type="time"
+                                    value={editedSchedule[key]?.from || ''}
+                                    disabled={!editedSchedule[key]?.isActive}
+                                    onChange={(e) => handleScheduleChange(key, 'from', e.target.value)}
+                                    className={styles.timeInput}
                                 />
-                            </label>
+                                <span>-</span>
+                                <input
+                                    type="time"
+                                    value={editedSchedule[key]?.to || ''}
+                                    disabled={!editedSchedule[key]?.isActive}
+                                    onChange={(e) => handleScheduleChange(key, 'to', e.target.value)}
+                                    className={styles.timeInput}
+                                />
+                            </div>
                         </div>
-                        <div className={styles.timeInputs}>
-                            <input
-                                type="time"
-                                value={editedSchedule[key]?.from || ''}
-                                disabled={!editedSchedule[key]?.isActive}
-                                onChange={(e) => handleScheduleChange(key, 'from', e.target.value)}
-                                className={styles.timeInput}
-                            />
-                            <span>-</span>
-                            <input
-                                type="time"
-                                value={editedSchedule[key]?.to || ''}
-                                disabled={!editedSchedule[key]?.isActive}
-                                onChange={(e) => handleScheduleChange(key, 'to', e.target.value)}
-                                className={styles.timeInput}
-                            />
-                        </div>
-                    </div>
-                ))}
+                    ))}
                     <div className={styles.buttons}>
                         <button className={styles.cancelButton} onClick={() => {
                             onClose();

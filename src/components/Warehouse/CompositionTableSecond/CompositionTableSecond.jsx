@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchIngredients } from '../../../store/warehouseAdminSlice';
 import styles from "../WarehouseTableAdmin/WarehouseTableAdmin.module.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../modalWarehouse/EditDeleteItemModel/EditDeleteItemModel';
 
 const CompositionTableSecond = () => {
-  const [ingredients, setIngredients] = useState([]);
+      const dispatch = useDispatch();
+const ingredients = useSelector((state) => state.warehouseIngredientAdmin.ingredients); // Предполагается, что у вас есть состояние 'ingredients' в слайсе 'warehouseIngredientAdmin'
+
+  // const [ingredients, setIngredients] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
@@ -32,27 +37,27 @@ const CompositionTableSecond = () => {
   //   fetchIngredients();
   // }, []);
 
-  const fetchIngredients = async () => {
-    const url = 'https://muha-backender.org.kg/admin-panel/ingredients/';
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      setIngredients(response.data);
-      console.log(response.data)
-    } catch (error) {
-      console.error('Ошибка при получении ингредиентов:', error);
-    }
-  };
+  // const fetchIngredients = async () => {
+  //   const url = 'https://muha-backender.org.kg/admin-panel/ingredients/';
+  //   try {
+  //     const accessToken = localStorage.getItem('accessToken');
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         'Authorization': `Bearer ${accessToken}`
+  //       }
+  //     });
+  //     setIngredients(response.data);
+  //     console.log(response.data)
+  //   } catch (error) {
+  //     console.error('Ошибка при получении ингредиентов:', error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchIngredients();
-  }, []);
+ useEffect(() => {
+    dispatch(fetchIngredients());
+  }, [dispatch]);
 
-  const currentItems = ingredients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+const currentItems = ingredients ? ingredients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
 
   const handlePrevClick = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -96,7 +101,7 @@ const CompositionTableSecond = () => {
                       onClose={closeEditDeleteModal}
                       itemId={currentItemId}
                       itemType='ingredient'
-                      fetchIngredients={fetchIngredients}
+                      // fetchIngredients={fetchIngredients}
                   />
 
                 </td>

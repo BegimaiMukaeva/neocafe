@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProducts } from '../../../store/warehouseAdminSlice';
 import styles from "./WarehouseTableAdmin.module.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../modalWarehouse/EditDeleteItemModel/EditDeleteItemModel';
 
 const WarehouseTableAdmin = () => {
-  const [products, setProducts] = useState([]);
+    const dispatch = useDispatch();
+const products = useSelector((state) => state.warehouseAdmin.products);
+
+  // const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
@@ -32,26 +37,27 @@ const WarehouseTableAdmin = () => {
   //
   //   fetchProducts();
   // }, []);
-  const fetchProducts = async () => {
-    const url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/';
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      setProducts(response.data);
-      console.log(response.data)
-    } catch (error) {
-      console.error('Ошибка при получении ингредиентов:', error);
-    }
-  };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
+  // const fetchProducts = async () => {
+  //   const url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/';
+  //   try {
+  //     const accessToken = localStorage.getItem('accessToken');
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         'Authorization': `Bearer ${accessToken}`
+  //       }
+  //     });
+  //     setProducts(response.data);
+  //     console.log(response.data)
+  //   } catch (error) {
+  //     console.error('Ошибка при получении ингредиентов:', error);
+  //   }
+  // };
+
+ useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   const currentItems = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 

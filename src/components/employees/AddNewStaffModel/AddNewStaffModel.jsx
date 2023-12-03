@@ -17,6 +17,7 @@ function AddNewStaffModel({ isVisible , onClose}) {
     const [positionPhone, setPositionPhone] = useState("");
     const [showDropdown, setShowDropdown] = useState(true);
     const [positionBranch, setPositionBranch] = useState(null); // Теперь это только ID филиала
+    const [selectedBranchId, setSelectedBranchId] = useState(null); // Теперь это только ID филиала
     const [branches, setBranches] = useState([]);
     const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
     const [showDropdownBranches, setShowDropdownBranches] = useState(false);
@@ -89,12 +90,17 @@ function AddNewStaffModel({ isVisible , onClose}) {
         setDropdownOpen(branchAllocations.reduce((acc, _, index) => ({ ...acc, [index]: false }), {}));
     }, [branchAllocations]);
 
+    //
+    // const handleBranchSelect = (branchId, branchName, index) => {
+    //     setPositionBranch(branchId.toString());
+    //     setShowDropdownBranches(false);
+    // };
 
     const handleBranchSelect = (branchId, branchName, index) => {
-        setPositionBranch(branchId.toString());
+        setSelectedBranchId(branchId); // Сохраняем ID для отправки запроса
+        setPositionBranch(branchName); // Сохраняем название для отображения
         setShowDropdownBranches(false);
     };
-
 
 
 
@@ -116,7 +122,7 @@ function AddNewStaffModel({ isVisible , onClose}) {
             position: convertPosition(positionJob),
             birth_date: positionDate,
             phone_number: formatPhoneNumber(positionPhone),
-            branch: positionBranch ? parseInt(positionBranch) : null,
+            branch: selectedBranchId ? parseInt(selectedBranchId) : null,
             workdays: formattedWorkdays
         };
         console.log('Отправляемые данные сотрудника:', employeeData);

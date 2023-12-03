@@ -166,7 +166,7 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
         return saveUpdatedWorkSchedule();
     })
     .then(() => {
-        onClose(); // Закрыть модальное окно после успешного обновления
+        onClose();
     })
     .catch(error => {
         console.error('Ошибка при обновлении сотрудника:', error);

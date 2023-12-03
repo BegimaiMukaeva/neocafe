@@ -1,26 +1,15 @@
-import React, { useState } from "react";
+import React  from "react";
+import { useDispatch } from 'react-redux';
+import {deleteItem} from '../../../../store/warehouseAdminSlice';
 import styles from "./DeleteItemModel.module.css";
 import closeModal from "../../../../img/X-black.svg";
-import axios from "axios";
 
-const DeleteItemModel = ({ isVisible, onClose, itemId, itemType, fetchItems, fetchProducts }) => {
-    const handleDelete = async () => {
-        try {
-            const accessToken = localStorage.getItem('accessToken');
-            const url = itemType === 'ingredient'
-                ? `https://muha-backender.org.kg/admin-panel/ingredients/destroy/${itemId}/`
-                : `https://muha-backender.org.kg/admin-panel/ready-made-products/destroy/${itemId}/`;
-            await axios.delete(url, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-            console.log(`${itemType} удален успешно:`, itemId);
-            onClose();
-            if (fetchItems) {
-                fetchItems();
-            }
-        } catch (error) {
-            console.error(`Ошибка при удалении ${itemType}:`, error);
-        }
+const DeleteItemModel = ({ isVisible, onClose, itemId, itemType}) => {
+    const dispatch = useDispatch();
+
+    const handleDelete = () => {
+        dispatch(deleteItem({ itemId, category: itemType }));
+        onClose();
     };
     return (
         <div className={isVisible ? styles.modalDeleteWrapper : styles.modalHidden}>

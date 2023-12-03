@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styles from './EditPositionModal.module.css';
 import closeModalImg from "../../../../img/X-black.svg";
+import { useDispatch } from 'react-redux';
+import {editItem} from '../../../../store/warehouseAdminSlice';
 import axios from "axios";
 
 function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredients, fetchProducts}) {
+    const dispatch = useDispatch();
     const [positionName, setPositionName] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -11,27 +14,6 @@ function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredie
         return positionName;
     };
 
-
-// useEffect(() => {
-//   if (itemId) {
-//     const accessToken = localStorage.getItem('accessToken');
-//     axios.get(`https://muha-backender.org.kg/admin-panel/ingredients/${itemId}`, {
-//       headers: {
-//         'Authorization': `Bearer ${accessToken}`
-//       }
-//     })
-//     .then(response => {
-//       setPositionName(response.data.name);
-//         console.log(response.data.name);
-//       setPositionLimit(response.data.minimal_limit);
-//     })
-//     .catch(error => {
-//       console.error('Ошибка при получении данных ингредиента:', error);
-//       // Обработайте ошибку
-//     });
-//   }
-// }, [itemId]);
-    console.log(`Тип элемента: ${itemType}`);
 
     useEffect(() => {
         if (itemId) {
@@ -63,63 +45,14 @@ function EditPositionModal({ isVisible, onClose, itemId, itemType, fetchIngredie
         }
     }, [itemId, itemType]);
 
-
-
-// const handleSubmit = () => {
-//   if (isFormValid()) {
-//     const updatedData = {
-//       name: positionName,
-//       minimal_limit: positionLimit,
-//     };
-//
-//     const accessToken = localStorage.getItem('accessToken');
-//     const headers = {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${accessToken}`
-//     };
-//
-//     axios.patch(`https://muha-backender.org.kg/admin-panel/ingredients/update/${itemId}/`, updatedData, { headers })
-//       .then(response => {
-//         console.log('Данные успешно обновлены:', response.data);
-//         onClose();
-//         resetFields();
-//         fetchIngredients();
-//       })
-//       .catch(error => {
-//         console.error('Ошибка при обновлении данных:', error);
-//         setErrorMessage("Ошибка при обновлении данных.");
-//       });
-//   } else {
-//     setErrorMessage("Пожалуйста, заполните все поля.");
-//   }
-// };
     const handleSubmit = () => {
         if (isFormValid()) {
             const updatedData = {
                 name: positionName,
             };
 
-            const accessToken = localStorage.getItem('accessToken');
-            const headers = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-            };
-
-            const url = itemType === 'ingredient'
-                ? `https://muha-backender.org.kg/admin-panel/ingredients/update/${itemId}/`
-                : `https://muha-backender.org.kg/admin-panel/ready-made-products/update/${itemId}/`;
-
-            axios.patch(url, updatedData, { headers })
-                .then(response => {
-                    console.log('Данные успешно обновлены:', response.data);
-                    onClose();
-                    resetFields();
-                    itemType === 'ingredient' ? fetchIngredients() : fetchProducts();
-                })
-                .catch(error => {
-                    console.error('Ошибка при обновлении данных:', error);
-                    setErrorMessage("Ошибка при обновлении данных.");
-                });
+            dispatch(editItem({ itemId, category: itemType, updatedData }));
+            onClose();
         } else {
             setErrorMessage("Пожалуйста, заполните все поля.");
         }

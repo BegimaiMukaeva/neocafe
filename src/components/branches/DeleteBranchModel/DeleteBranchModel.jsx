@@ -1,26 +1,20 @@
 import React from 'react';
-import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { deleteBranch } from '../../../store/branchesAdminSlice';
 import styles from "./DeleteBranchModel.module.css";
 import closeModal from "../../../img/X-black.svg";
 
 const DeleteBranchModel = ({ isVisible, onClose, branchId }) => {
-    const handleSubmit = async () => {
-        try {
-            const accessToken = localStorage.getItem('accessToken');
-            const response = await axios.delete(`https://muha-backender.org.kg/branches/delete/${branchId}/`, {
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                }
-            });
+    const dispatch = useDispatch();
 
-            if (response.status === 204) {
-                console.log("Филиал удален успешно");
+    const handleSubmit = () => {
+        dispatch(deleteBranch(branchId))
+            .then(() => {
                 onClose();
-            }
-        } catch (error) {
-            console.error('Ошибка при удалении филиала:', error);
-        }
+            })
+            .catch(error => {
+                console.error('Ошибка при удалении филиала:', error);
+            });
     };
 
     return (

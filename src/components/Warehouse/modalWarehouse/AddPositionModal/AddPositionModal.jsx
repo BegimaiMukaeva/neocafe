@@ -1,4 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
+import { useDispatch } from 'react-redux';
+import { addProduct } from '../../../../store/warehouseAdminSlice';
 import styles from './AddPositionModal.module.css';
 import closeModalImg from "../../../../img/X-black.svg";
 import plusSvg from "../../../../img/Plus-white.svg";
@@ -7,6 +9,7 @@ import dropdownVector from "../../../../img/dropdown-vector.svg";
 import axios from "axios";
 
 function AddPositionModal({ isVisible, onClose }) {
+    const dispatch = useDispatch();
     const [positionName, setPositionName] = useState("");
     const [positionLimit, setPositionLimit] = useState("");
     const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
@@ -63,60 +66,24 @@ function AddPositionModal({ isVisible, onClose }) {
             minimal_limit: Number(positionLimit),
         }));
 
-    const handleSubmit = async () => {
-        if (!positionName || !positionLimit || !productCategory) {
-            setErrorMessage("Пожалуйста, заполните все поля.");
-            if (availableAtBranches.length === 0) {
-                setErrorMessage("Необходимо указать филиалы и количество.");
-                return;
-            }
-            return;
-        }
 
-        if (availableAtBranches.some(ab => isNaN(ab.branch) || isNaN(ab.quantity))) {
-            setErrorMessage("All branches must have a valid ID and quantity.");
-            return;
-        }
-
-        let postData = {};
-        let url = '';
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+    const handleSubmit = () => {
+        const productData = {
+            name: positionName,
+            category: productCategory,
+            available_at_branches: availableAtBranches,
         };
-
-        if (productCategory === "Готовая продукция") {
-            postData = {
-                name: positionName,
-                available_at_branches: availableAtBranches
-            };
-            url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/create/';
-        } else if (productCategory === "Сырье") {
-            postData = {
-                name: positionName,
-                measurement_unit: 'g',
-                available_at_branches: availableAtBranches
-            };
-            url = 'https://muha-backender.org.kg/admin-panel/ingredients/create/';
-        }
-
-        try {
-            const response = await axios.post(url, postData, { headers });
-
-            if (response.status === 201) {
-                console.log('Продукция успешно создана:', postData);
-                resetFields();
+        dispatch(addProduct(productData))
+            .then(() => {
                 onClose();
-            } else {
-                setErrorMessage("Произошла ошибка при создании продукции.");
-            }
-        } catch (error) {
-            console.error('Ошибка при создании продукции:', error);
-            const errorData = error.response && typeof error.response.data === 'object' ? JSON.stringify(error.response.data, null, 2) : error.response.data || "Произошла ошибка при создании продукции.";
-            setErrorMessage(errorData);
-        }
+                resetFields();
+            })
+            .catch(error => {
+                console.error('Ошибка при добавлении продукции:', error);
+                setErrorMessage("Произошла ошибка при добавлении продукции.");
+            });
     };
+
 
     const toggleDropdownBranch = (index) => {
         fetchBranches();
@@ -245,45 +212,45 @@ function AddPositionModal({ isVisible, onClose }) {
                     {branchAllocations.map((allocation, index) => (
                         <div key={index}>
                             <div  className={styles.categoryAndPrice}>
-                            <label className={styles.nameOfInput}>Филиалы
-                                <div className={styles.dropdown}>
-                                    <button
-                                        className={`${styles.dropdownButton} ${dropdownOpen[index] ? styles.dropdownButtonOpen : ''}`}
-                                        onClick={() => toggleDropdownBranch(index)} // Измените здесь
-                                    >
-                                        {allocation.branch.name || "Выберите филиал"}
-                                        <span className={styles.dropdownArrow}>
+                                <label className={styles.nameOfInput}>Филиалы
+                                    <div className={styles.dropdown}>
+                                        <button
+                                            className={`${styles.dropdownButton} ${dropdownOpen[index] ? styles.dropdownButtonOpen : ''}`}
+                                            onClick={() => toggleDropdownBranch(index)} // Измените здесь
+                                        >
+                                            {allocation.branch.name || "Выберите филиал"}
+                                            <span className={styles.dropdownArrow}>
                                             <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
                                         </span>
-                                    </button>
-                                    {dropdownOpen[index] && (
-                                        <div className={styles.dropdownMenu}>
-                                            {branches.map((branch) => (
-                                                <div
-                                                    className={styles.dropdownItem}
-                                                    key={branch.id}
-                                                    onClick={(event) => {
-                                                        event.preventDefault();
-                                                        handleBranchSelect(branch.id, branch.name_of_shop, index);
-                                                        setDropdownOpen(prevState => ({ ...prevState, [index]: false }));
-                                                    }}
-                                                >
-                                                    {branch.name_of_shop}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </label>
-                            <label className={styles.nameOfInput}>Количество
-                                <input
-                                    type="number"
-                                    placeholder="Количество для филиала"
-                                    value={allocation.amount}
-                                    onChange={e => updateBranchQuantity(index, e.target.value)}
+                                        </button>
+                                        {dropdownOpen[index] && (
+                                            <div className={styles.dropdownMenu}>
+                                                {branches.map((branch) => (
+                                                    <div
+                                                        className={styles.dropdownItem}
+                                                        key={branch.id}
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            handleBranchSelect(branch.id, branch.name_of_shop, index);
+                                                            setDropdownOpen(prevState => ({ ...prevState, [index]: false }));
+                                                        }}
+                                                    >
+                                                        {branch.name_of_shop}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+                                <label className={styles.nameOfInput}>Количество
+                                    <input
+                                        type="number"
+                                        placeholder="Количество для филиала"
+                                        value={allocation.amount}
+                                        onChange={e => updateBranchQuantity(index, e.target.value)}
                                         className={styles.amountBranch}
-                                />
-                            </label>
+                                    />
+                                </label>
                             </div>
                             <div className={styles.compositionOfDish}>
                                 <label className={styles.nameOfInput}>Минимальный лимит
@@ -296,16 +263,16 @@ function AddPositionModal({ isVisible, onClose }) {
                                     />
                                 </label>
                                 <label className={styles.nameOfInput}  htmlFor="">Изм-я
-                                <select
-                                    className={styles.selectInput}
-                                >
-                                    <option>грамм</option>
-                                    <option>кг</option>
-                                    <option>мл</option>
-                                    <option>литр</option>
-                                    <option>шт</option>
-                                </select>
-                            </label>
+                                    <select
+                                        className={styles.selectInput}
+                                    >
+                                        <option>грамм</option>
+                                        <option>кг</option>
+                                        <option>мл</option>
+                                        <option>литр</option>
+                                        <option>шт</option>
+                                    </select>
+                                </label>
                             </div>
                         </div>
                     ))}
