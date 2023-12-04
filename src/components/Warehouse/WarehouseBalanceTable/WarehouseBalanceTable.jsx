@@ -7,8 +7,6 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-
-
 const WarehouseBalanceTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -23,7 +21,7 @@ const WarehouseBalanceTable = () => {
   const currentItems = lowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
 
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchBranches = async () => {
       try {
         const branchResponse = await axios.get('https://muha-backender.org.kg/branches/', {
@@ -40,14 +38,14 @@ const WarehouseBalanceTable = () => {
     fetchBranches();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (selectedBranchId) {
       fetchLowStockProducts(selectedBranchId);
     }
   }, [selectedBranchId]);
 
 
-   const fetchLowStockProducts = async (branchId) => {
+  const fetchLowStockProducts = async (branchId) => {
     try {
       const response = await axios.get(`https://muha-backender.org.kg/admin-panel/ingredient-quantity-in-branch/${branchId}/`, {
         headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }

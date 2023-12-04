@@ -19,7 +19,6 @@ const FinishedProductTable = () => {
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = lowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -37,12 +36,6 @@ const FinishedProductTable = () => {
 
     fetchBranches();
   }, []);
-
-  useEffect(() => {
-    if (selectedBranchId) {
-      fetchLowStockProducts(selectedBranchId);
-    }
-  }, [selectedBranchId]);
 
   const fetchLowStockProducts = async (branchId) => {
     try {
@@ -62,9 +55,25 @@ const FinishedProductTable = () => {
 
   const handleCategorySelect = (branchName, branchId) => {
     setSelectedCategory(branchName);
-    setSelectedBranchId(branchId);
+    if (selectedBranchId !== branchId) {
+      setSelectedBranchId(branchId);
+      fetchLowStockProducts(branchId);
+    }
     setShowDropdown(false);
   };
+
+  useEffect(() => {
+    if (selectedBranchId) {
+      fetchLowStockProducts(selectedBranchId);
+    }
+  }, [selectedBranchId]);
+
+  const filteredLowStockProducts = selectedBranchId
+      ? lowStockProducts.filter(item => item.name_of_shop === selectedCategory)
+      : lowStockProducts;
+
+  const currentItems = filteredLowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
+
 
   const handlePaginationClick = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -77,7 +86,7 @@ const FinishedProductTable = () => {
   };
 
   const handleNextClick = () => {
-    if (currentPage < Math.ceil(lowStockProducts.length/ itemsPerPage)) {
+    if (currentPage < Math.ceil(filteredLowStockProducts.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -133,9 +142,9 @@ const FinishedProductTable = () => {
           {currentItems.map((item, index) => (
               <tr key={index}>
                 <td>{index + 1 + indexOfFirstItem}</td>
-                <td>{item.ingredient}</td>
-                <td>{item.ingredient.minimal_limit} {item.ingredient.measurement_unit}</td>
-                <td>{item.quantity} {item.ingredient.measurement_unit}</td>
+                <td>{item.ingredient_name}</td>
+                <td>{item.min_limit}</td>
+                <td>{item.quantity}</td>
               </tr>
           ))}
           </tbody>
