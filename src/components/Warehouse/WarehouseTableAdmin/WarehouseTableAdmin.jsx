@@ -87,8 +87,13 @@ const products = useSelector((state) => state.warehouseAdmin.products);
             <th>Наименование</th>
             <th>Количество</th>
             <th>Дата прихода</th>
+            <th>Ред.</th>
           </tr>
           </thead>
+            <td colSpan="6">
+                    <div className={styles.table__hrLine}>
+                    </div>
+                </td>
           <tbody>
           {currentItems.map((product, index) => (
               <tr key={product.id}>

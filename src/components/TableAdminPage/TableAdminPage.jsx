@@ -16,11 +16,14 @@ import EditDeleteItemModel from '../modalMenu/EditDeleteItemModel/EditDeleteItem
 
 
 const TableAdminPage = () => {
-
     const dispatch = useDispatch();
+
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
     const products = useSelector(state => state.compositionMenu);
+    // const products = useSelector(state => state.compositionMenu.products);
+    // const searchResults = useSelector(state => state.compositionMenu.searchResults);
+
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("");
@@ -37,6 +40,16 @@ const TableAdminPage = () => {
     const [categoryIdToDelete, setCategoryIdToDelete] = useState(null);
     const [categoryNameToDelete, setCategoryNameToDelete] = useState('');
     const [availableIngredients, setAvailableIngredients] = useState([]);
+
+// const displayProducts = searchResults.length > 0 ? searchResults : products;
+    // const displayProducts = (searchResults && searchResults.length > 0) ? searchResults : products;
+
+    // const indexOfLastItem = currentPage * itemsPerPage;
+    // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    // const currentItems = displayProducts.slice(indexOfFirstItem, indexOfLastItem);
+// const currentItems = displayProducts ? displayProducts.slice(indexOfFirstItem, indexOfLastItem) : [];
+
+// const totalPages = products ? Math.ceil(products.length / itemsPerPage) : 0;
 
 
     const fetchAvailableIngredients = async () => {
@@ -160,12 +173,6 @@ const TableAdminPage = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
     };
-    // const openDeleteModal = (category, event) => {
-    //   event.stopPropagation();
-    //   setCategoryToDelete(category);
-    //   setIsDeleteModalOpen(true);
-    //   // setShowDropdown(false);
-    // };
     const openDeleteModal = (category, event) => {
         event.stopPropagation();
         setCategoryToDelete(category.name);
@@ -246,6 +253,7 @@ const TableAdminPage = () => {
                     </th>
                     <th>Состав блюда и граммовка</th>
                     <th>Стоимость</th>
+                    <th>Ред.</th>
                 </tr>
                 </thead>
                 <td colSpan="6">

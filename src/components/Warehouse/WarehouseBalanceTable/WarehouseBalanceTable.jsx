@@ -104,6 +104,7 @@ const WarehouseBalanceTable = () => {
           <tr>
             <th>№</th>
             <th>Наименование</th>
+            <th>Остаток</th>
             <th className={styles.table__categoryTh}>
               {selectedCategory || "Выберите филиал"}
               <span onClick={toggleDropdown}>
@@ -125,10 +126,12 @@ const WarehouseBalanceTable = () => {
             </th>
           </tr>
           </thead>
-          <td colSpan="6">
-            <div className={styles.table__hrLine}>
-            </div>
-          </td>
+          <tr>
+            <td colSpan="6">
+              <div className={styles.table__hrLine}>
+              </div>
+            </td>
+          </tr>
           <tbody>
           {currentItems.map((item, index) => (
               <tr key={index}>

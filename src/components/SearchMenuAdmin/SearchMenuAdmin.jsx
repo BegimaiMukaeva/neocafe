@@ -1,15 +1,21 @@
 import React, { useState }  from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchProductsBySearch } from '../../store/compositionMenuSlice';
 import searchIcon from '../../img/searchAdminIcon.svg';
+import searchInputIcon from '../../img/searchIcon.svg';
 import styles from './SearchMenuAdmin.module.css';
-import { SearchOutlined } from '@ant-design/icons';
-import { Input } from 'antd';
 import NotificationsAdminPage from '../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddPositionModal from '../modalMenu/AddPositionModal/AddPositionModal';
 
 const SearchMenuAdmin = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+   const dispatch = useDispatch();
 
+  const handleSearchChange = async (event) => {
+    const searchTerm = event.target.value;
+    dispatch(fetchProductsBySearch(searchTerm));
+  };
     const showModal = () => {
         setIsModalVisible(true);
     };
@@ -38,12 +44,22 @@ const SearchMenuAdmin = () => {
                 />
             </div>
             <div className={styles.searchMenuInput}>
-                <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />
+                <div className={styles.searchContainer}>
+                    <span className={styles.searchIconInput}>
+                        <img src={searchInputIcon} alt=""/>
+                    </span>
+                    <input
+                        className={styles.searchInput}
+                        type="search"
+                        placeholder={'Поиск'}
+                        // value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
+                </div>
                 <button className={styles.newPosition} onClick={openModal}>Создать</button>
                 <AddPositionModal
                     isVisible={isAddModalVisible}
                     onClose={cancelModal}
-                    options={["Кофе", "Десерты", "Выпечка", "Коктейли", "Чай"]}
                 />
             </div>
         </div>

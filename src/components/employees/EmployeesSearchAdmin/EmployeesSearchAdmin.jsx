@@ -5,6 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddNewStaffModel from '../AddNewStaffModel/AddNewStaffModel';
+import searchInputIcon from "../../../img/searchIcon.svg";
 
 const EmployeesSearchAdmin = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,7 +39,12 @@ const EmployeesSearchAdmin = () => {
                 />
             </div>
             <div className={styles.searchMenuInput}>
-                <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />
+                <div className={styles.searchContainer}>
+                    <span className={styles.searchIconInput}>
+                        <img src={searchInputIcon} alt=""/>
+                    </span>
+                    <input className={styles.searchInput} type="search" placeholder={'Поиск'}/>
+                </div>
                 <button className={styles.newPosition} onClick={openModal}>Создать</button>
                 <AddNewStaffModel
                     isVisible={isAddModalVisible}

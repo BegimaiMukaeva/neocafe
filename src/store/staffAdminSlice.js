@@ -30,19 +30,16 @@ export const fetchStaff = createAsyncThunk(
         try {
             const accessToken = localStorage.getItem('accessToken');
 
-            // Запрашиваем данные о филиалах
             const branchesResponse = await axios.get('https://muha-backender.org.kg/branches/', {
                 headers: { 'accept': 'application/json' }
             });
 
-            // Проверяем, есть ли данные о филиалах
             if (!branchesResponse.data) {
                 console.error('Данные о филиалах отсутствуют');
                 return;
             }
             const branchesData = branchesResponse.data;
 
-            // Запрашиваем данные о сотрудниках
             const employeesResponse = await axios.get('https://muha-backender.org.kg/admin-panel/employees/', {
                 headers: {
                     'accept': 'application/json',
@@ -50,7 +47,6 @@ export const fetchStaff = createAsyncThunk(
                 }
             });
             console.log(employeesResponse.data)
-            // Проверяем, есть ли данные о сотрудниках
             if (!employeesResponse.data) {
                 console.error('Ответ сотрудников пуст');
                 return;

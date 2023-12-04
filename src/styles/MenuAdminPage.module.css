@@ -11,3 +11,8 @@ button {
     display: flex;
     justify-content: start;
 }
+.searchMenu {
+    width: 100%;
+    flex-grow: 0;
+    flex-basis: 100%;
+}

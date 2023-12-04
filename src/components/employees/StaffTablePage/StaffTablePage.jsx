@@ -26,7 +26,6 @@ const StaffTablePage = () => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
-  // const [employees, setEmployees] = useState([]);
 
 
   // useEffect(() => {
@@ -57,7 +56,7 @@ const StaffTablePage = () => {
   // }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchStaff()); // Загружаем сотрудников через Redux action
+    dispatch(fetchStaff());
     const fetchBranches = async () => {
       try {
         const branchResponse = await axios.get('https://muha-backender.org.kg/branches/', {
@@ -70,7 +69,7 @@ const StaffTablePage = () => {
       }
     };
     fetchBranches();
-  }, [dispatch]); // Указываем зависимость от dispatch
+  }, [dispatch]);
 
 
   function getBranchNameById(branchId, branchesData) {
@@ -199,6 +198,7 @@ const StaffTablePage = () => {
             </th>
             <th>Телефон</th>
             <th>График работы</th>
+            <th>Ред.</th>
           </tr>
           </thead>
           <td colSpan="6">

@@ -1,10 +1,9 @@
 import React, { useState }  from 'react';
 import searchIcon from '../../../img/searchAdminIcon.svg';
 import styles from '../../SearchMenuAdmin/SearchMenuAdmin.module.css';
-import { SearchOutlined } from '@ant-design/icons';
-import { Input } from 'antd';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddPositionModal from '../modalWarehouse/AddPositionModal/AddPositionModal';
+import searchInputIcon from "../../../img/searchIcon.svg";
 
 const WarehouseSearchAdmin = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,7 +37,12 @@ const WarehouseSearchAdmin = () => {
                 />
             </div>
             <div className={styles.searchMenuInput}>
-                <Input className={styles.searchInput} prefix={<SearchOutlined/>} placeholder='Поиск' />
+                <div className={styles.searchContainer}>
+                    <span className={styles.searchIconInput}>
+                        <img src={searchInputIcon} alt=""/>
+                    </span>
+                    <input className={styles.searchInput} type="search" placeholder={'Поиск'}/>
+                </div>
                 <button className={styles.newPosition} onClick={openModal}>Создать</button>
                 <AddPositionModal
                     isVisible={isAddModalVisible}

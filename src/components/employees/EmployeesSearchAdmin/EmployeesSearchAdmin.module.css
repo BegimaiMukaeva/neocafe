@@ -1,33 +1,57 @@
 .main {
-    padding: 16px 0 32px 22px;
+    width: 100%;
+    padding: 22px 0 32px 0;
     font-family: Nunito;
 }
-.searchMenu {
+.searchMenu, .searchMenuInput {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    width: 1160px;
+    padding: 0 56px 0 22px;
 }
+.searchMenu {
+    /*margin-bottom: 30px;*/
+}
+.searchContainer {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    background: #E7E7E7;
+    width: 70%;
+    padding: 0 10px;
+}
+.searchIconInput {
+    margin-right: 5px;
+    width: 22px;
+    height: 22px;
+}
+
 .searchMenu h2 {
+    margin-bottom: 24px;
     font-size: 48px;
     font-weight: 600;
     line-height: 58px;
     color: #171717;
 }
+
 .searchMenuButton {
     background-color: transparent;
     border: none;
     cursor: pointer;
 }
 .searchInput {
-    width: 727px;
     height: 42px;
     padding: 10px 16px 10px 16px;
     border-radius: 6px;
     gap: 8px;
     background: #E7E7E7;
     border: none;
+    outline: none;
+    font-family: Nunito;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #C1C1C3;
 }
 .searchMenuInput .newPosition {
     width: 164px;
@@ -40,7 +64,14 @@
 .searchIcon {
     cursor: pointer;
 }
+.searchIconInput {
+    margin-right: 5px;
+    width: 22px;
+    height: 22px;
+}
+
 .filterStaffTitle {
+    width: 220px;
     font-size: 18px;
     font-weight: 600;
     line-height: 22px;

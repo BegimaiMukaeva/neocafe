@@ -10,7 +10,7 @@ const EmployeesPageAdmin = () => {
             <div>
                 <SidebarAdmin />
             </div>
-            <div>
+            <div className={styles.searchMenu}>
                 <EmployeesSearchAdmin />
                 <StaffTablePage />
             </div>

@@ -10,7 +10,7 @@ const MenuAdminPage = () => {
             <div>
                 <SidebarAdmin />
             </div>
-            <div>
+            <div className={styles.searchMenu}>
                 <SearchMenuAdmin />
                 <TableAdminPage />
             </div>

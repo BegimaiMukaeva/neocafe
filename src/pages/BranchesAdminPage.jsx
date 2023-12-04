@@ -10,7 +10,7 @@ const BranchesAdminPage = () => {
             <div>
                 <SidebarAdmin />
             </div>
-            <div>
+            <div className={styles.searchMenu}>
                 <BranchesSearchAdmin />
                 <BranchesTablePage />
             </div>

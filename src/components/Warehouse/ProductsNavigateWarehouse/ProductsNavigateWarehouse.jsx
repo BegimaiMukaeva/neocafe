@@ -33,7 +33,7 @@ const ProductsNavigateWarehouse = () => {
 
     return (
         <div>
-            <div className={styles.main}>
+            <div className={styles.mainNavigate}>
                 <button
                     className={getButtonClass('finishedProducts')}
                     onClick={() => handleTableChange('finishedProducts')}

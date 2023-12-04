@@ -113,6 +113,7 @@ const FinishedProductTable = () => {
             <th>№</th>
             <th>Наименование</th>
             <th>Лимит</th>
+            <th>Остаток</th>
             <th className={styles.table__categoryTh}>
               {selectedCategory || "Выберите филиал"}
               <span onClick={toggleDropdown}>

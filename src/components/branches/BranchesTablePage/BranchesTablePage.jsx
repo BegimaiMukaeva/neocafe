@@ -13,26 +13,12 @@ import EditDeleteItemModel from '../EditDeleteItemModel/EditDeleteItemModel';
 const BranchesTablePage = () => {
     const dispatch = useDispatch();
     const branches = useSelector((state) => state.branchesAdmin.branches);
-    // const [branches, setBranches] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
-
     const [showDropdown, setShowDropdown] = useState(false);
     const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
 
-    // const fetchBranches = async () => {
-    //     try {
-    //         const response = await axios.get('https://muha-backender.org.kg/branches/', {
-    //             headers: {
-    //                 'accept': 'application/json',
-    //             }
-    //         });
-    //         setBranches(response.data);
-    //     } catch (error) {
-    //         console.error('Ошибка при получении данных о филиалах:', error);
-    //     }
-    // };
     useEffect(() => {
         dispatch(fetchBranches());
         }, [dispatch]);
@@ -124,6 +110,7 @@ const BranchesTablePage = () => {
                     <th>Название кофейни</th>
                     <th className={styles.table__categoryTh}>Адрес</th>
                     <th>Время работы</th>
+                    <th>Ред.</th>
                 </tr>
                 </thead>
                 <td colSpan="6">

@@ -10,7 +10,7 @@ const WarehouseAdminPage = () => {
             <div>
                 <SidebarAdmin />
             </div>
-            <div>
+            <div className={styles.searchMenu}>
                 <WarehouseSearchAdmin />
                 <ProductsNavigateWarehouse />
             </div>

@@ -9,9 +9,8 @@ import EditDeleteItemModel from '../modalWarehouse/EditDeleteItemModel/EditDelet
 
 const CompositionTableSecond = () => {
       const dispatch = useDispatch();
-const ingredients = useSelector((state) => state.warehouseIngredientAdmin.ingredients); // Предполагается, что у вас есть состояние 'ingredients' в слайсе 'warehouseIngredientAdmin'
+const ingredients = useSelector((state) => state.warehouseIngredientAdmin.ingredients);
 
-  // const [ingredients, setIngredients] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
@@ -85,8 +84,13 @@ const currentItems = ingredients ? ingredients.slice((currentPage - 1) * itemsPe
             <th>Наименование</th>
             <th>Количество</th>
             <th>Дата прихода</th>
+            <th>Ред.</th>
           </tr>
           </thead>
+            <td colSpan="6">
+                    <div className={styles.table__hrLine}>
+                    </div>
+                </td>
           <tbody>
           {currentItems.map((ingredient, index) => (
               <tr key={ingredient.id}>
