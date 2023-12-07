@@ -8,10 +8,32 @@ const initialState = {
     searchTerm: '',
 };
 
-
+//
+// export const addNewCompositionMenu = createAsyncThunk(
+//     'compositionMenu/addNewCompositionMenu',
+//     async (data, {dispatch}) => {
+//         try {
+//             const accessToken = localStorage.getItem('accessToken');
+//             const response = await axios.post('https://muha-backender.org.kg/admin-panel/items/create/', JSON.stringify(data), {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Authorization': `Bearer ${accessToken}`,
+//                 }
+//             });
+//             console.log('addNewCompositionMenu Response:', response.data);
+//             if (response.data) {
+//                 dispatch(fetchProducts());
+//             }
+//             return response.data;
+//         } catch (error) {
+//             console.error('Ошибка при создании позиции:', error.response.data);
+//             return null;
+//         }
+//     }
+// );
 export const addNewCompositionMenu = createAsyncThunk(
     'compositionMenu/addNewCompositionMenu',
-    async (data, {dispatch}) => {
+    async (data, {rejectWithValue}) => {
         try {
             const accessToken = localStorage.getItem('accessToken');
             const response = await axios.post('https://muha-backender.org.kg/admin-panel/items/create/', JSON.stringify(data), {
@@ -21,16 +43,13 @@ export const addNewCompositionMenu = createAsyncThunk(
                 }
             });
             console.log('addNewCompositionMenu Response:', response.data);
-            if (response.data) {
-                dispatch(fetchProducts());
-            }
-            return response.data;
+            return response.data.id; // Возвращаем id созданной позиции
         } catch (error) {
-            console.error('Ошибка при создании позиции:', error.response.data);
-            return null;
+            return rejectWithValue(error.response.data);
         }
     }
 );
+
 
 export const fetchProducts = createAsyncThunk(
     'compositionMenu/fetchProducts',

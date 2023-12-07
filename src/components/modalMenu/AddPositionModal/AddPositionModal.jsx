@@ -6,6 +6,7 @@ import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
 import {addNewCompositionMenu} from "../../../store/compositionMenuSlice";
+import { fetchProducts} from '../../../store/compositionMenuSlice';
 
 function AddPositionModal({ isVisible, onClose, options }) {
     const [positionName, setPositionName] = useState("");
@@ -115,24 +116,6 @@ function AddPositionModal({ isVisible, onClose, options }) {
     };
 
 
-    const createPosition = async () => {
-        const data = {
-            name: positionName,
-            description: description,
-            category: parseInt(selectedCategoryId),
-            price: parseFloat(price),
-            is_available: true,
-            composition: ingredients.map(ingredient => ({
-                ingredient: ingredient.id,
-                quantity: parseFloat(ingredient.amount)
-            }))
-        };
-        console.log('Отправляемые данные для создания позиции:', data);
-
-
-        dispatch(addNewCompositionMenu(data));
-
-    }
 
     const uploadImage = async (positionId) => {
         const formData = new FormData();
@@ -146,23 +129,43 @@ function AddPositionModal({ isVisible, onClose, options }) {
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
-
+            dispatch(fetchProducts());
             console.log('Изображение успешно загружено');
+            onClose ();
+            resetFields();
         } catch (error) {
             console.error('Ошибка при загрузке изображения:', error.response ? error.response.data : error);
 
         }
     };
 
-    const handleSubmit = async () => {
-        resetFields();
-        onClose();
 
-        const positionId = await createPosition();
+const handleSubmit = async () => {
+    const data = {
+        name: positionName,
+        description: description,
+        category: parseInt(selectedCategoryId),
+        price: parseFloat(price),
+        is_available: true,
+        composition: ingredients.map(ingredient => ({
+            ingredient: ingredient.id,
+            quantity: parseFloat(ingredient.amount)
+        }))
+    };
+
+    try {
+        const actionResult = await dispatch(addNewCompositionMenu(data));
+        const positionId = actionResult.payload; // Получаем id из результата действия
+
         if (positionId && image) {
             await uploadImage(positionId);
         }
-    };
+    } catch (error) {
+        console.error('Ошибка при создании позиции:', error);
+    }
+};
+
+
 
     const resetFields = () => {
         setPositionName("");
