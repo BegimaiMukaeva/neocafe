@@ -155,7 +155,7 @@ const handleSubmit = async () => {
 
     try {
         const actionResult = await dispatch(addNewCompositionMenu(data));
-        const positionId = actionResult.payload; // Получаем id из результата действия
+        const positionId = actionResult.payload;
 
         if (positionId && image) {
             await uploadImage(positionId);
