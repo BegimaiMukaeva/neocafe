@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchStaff } from '../../../store/staffAdminSlice';
+import {updateEmployees} from '../../../store/staffAdminSlice';
 import styles from "./StaffTablePage.module.css";
 import {
   CaretDownOutlined,
@@ -14,7 +15,7 @@ import axios from "axios";
 
 const StaffTablePage = () => {
   const dispatch = useDispatch();
-  const employees = useSelector(state => state.staffAdmin); // Данные сотрудников из Redux Store
+  const employees = useSelector(state => state.staffAdmin);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
@@ -55,6 +56,7 @@ const StaffTablePage = () => {
   //   fetchBranches();
   // }, [dispatch]);
 
+
   useEffect(() => {
     dispatch(fetchStaff());
     const fetchBranches = async () => {
@@ -72,16 +74,49 @@ const StaffTablePage = () => {
   }, [dispatch]);
 
 
+const formatSchedule = (workdays) => {
+    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    return workdays
+        .filter(day => day.start_time && day.end_time)
+        .map(day => dayNames[day.workday - 1])
+        .join(', ');
+};
+
+const fetchEmployeesByBranch = async (branchId = '') => {
+    try {
+        const url = branchId
+            ? `https://muha-backender.org.kg/admin-panel/employees/?branch=${branchId}`
+            : 'https://muha-backender.org.kg/admin-panel/employees/';
+
+        const response = await axios.get(url, {
+            headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+        });
+
+        const employees = response.data.map(employee => ({
+            ...employee,
+            schedule: formatSchedule(employee.schedule.workdays)
+        }));
+
+        dispatch(updateEmployees(employees));
+    } catch (error) {
+        console.error('Ошибка при получении списка сотрудников:', error);
+    }
+};
+
+
   function getBranchNameById(branchId, branchesData) {
     const branch = branchesData.find(b => b.id === branchId);
     return branch ? branch.name : 'Неизвестный филиал';
   }
-
   const handleCategorySelect = (branchName, branchId) => {
     setSelectedCategory(branchName);
     setSelectedBranchId(branchId);
     setShowDropdown(false);
+    fetchEmployeesByBranch(branchId);
   };
+
+
+
   //
   // useEffect(() => {
   //   const fetchEmployees = async () => {
@@ -184,6 +219,13 @@ const StaffTablePage = () => {
                   </span>
               {showDropdown && (
                   <div className={styles.dropdown}>
+                    <div
+                        className={styles.menuCategory}
+                        key="all-branches"
+                        onClick={() => handleCategorySelect('Все филиалы', '')}
+                    >
+                      Все филиалы
+                    </div>
                     {branches.map((branch) => (
                         <div
                             className={styles.menuCategory}

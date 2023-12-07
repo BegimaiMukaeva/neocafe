@@ -16,14 +16,14 @@ function AddNewStaffModel({ isVisible , onClose}) {
     const [positionDate, setPositionDate] = useState("");
     const [positionPhone, setPositionPhone] = useState("");
     const [showDropdown, setShowDropdown] = useState(true);
-    const [positionBranch, setPositionBranch] = useState(null); // Теперь это только ID филиала
-    const [selectedBranchId, setSelectedBranchId] = useState(null); // Теперь это только ID филиала
+    const [positionBranch, setPositionBranch] = useState(null);
+    const [selectedBranchId, setSelectedBranchId] = useState(null);
     const [branches, setBranches] = useState([]);
     const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
     const [showDropdownBranches, setShowDropdownBranches] = useState(false);
     const dropdownRef = useRef(null);
     const dropdownBranchesRef = useRef(null);
-    const [dropdownOpen, setDropdownOpen] = useState({}); // Объект для управления состоянием каждого dropdown
+    const [dropdownOpen, setDropdownOpen] = useState({});
     const [schedule, setSchedule] = useState({
         monday: { isActive: false, from: "08:00", to: "17:00" },
         tuesday: { isActive: false, from: "08:00", to: "17:00" },
@@ -90,15 +90,9 @@ function AddNewStaffModel({ isVisible , onClose}) {
         setDropdownOpen(branchAllocations.reduce((acc, _, index) => ({ ...acc, [index]: false }), {}));
     }, [branchAllocations]);
 
-    //
-    // const handleBranchSelect = (branchId, branchName, index) => {
-    //     setPositionBranch(branchId.toString());
-    //     setShowDropdownBranches(false);
-    // };
-
     const handleBranchSelect = (branchId, branchName, index) => {
-        setSelectedBranchId(branchId); // Сохраняем ID для отправки запроса
-        setPositionBranch(branchName); // Сохраняем название для отображения
+        setSelectedBranchId(branchId);
+        setPositionBranch(branchName);
         setShowDropdownBranches(false);
     };
 
@@ -227,7 +221,7 @@ function AddNewStaffModel({ isVisible , onClose}) {
 
                     <label className={styles.nameOfInput}>Пароль
                         <input
-                            type=""
+                            type="text"
                             placeholder="Придумайте пароль"
                             value={password}
                             onChange={e => setPassword(e.target.value)}

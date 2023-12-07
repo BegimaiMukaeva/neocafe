@@ -5,8 +5,6 @@ import styles from './AddPositionModal.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
-import dropdownVector from '../../../img/dropdown-vector.svg';
-import openDropdownVector from '../../../img/dropdownVectorOpen.svg';
 import {addNewCompositionMenu} from "../../../store/compositionMenuSlice";
 
 function AddPositionModal({ isVisible, onClose, options }) {

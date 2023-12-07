@@ -82,10 +82,36 @@ const TableAdminPage = () => {
             console.error('Ошибка при получении категорий: ', error);
         }
     };
-    const fetchProducts = async () => {
+    // const fetchProducts = async () => {
+    //     try {
+    //         const accessToken = localStorage.getItem('accessToken');
+    //         const response = await axios.get('https://muha-backender.org.kg/admin-panel/items/', {
+    //             headers: {
+    //                 'accept': 'application/json',
+    //                 'Authorization': `Bearer ${accessToken}`,
+    //             }
+    //         });
+    //         dispatch(setProducts(response.data));
+    //     } catch (error) {
+    //         console.error('Ошибка при получении продуктов:', error);
+    //     }
+    // };
+    //
+    //
+    // useEffect(() => {
+    //     fetchProducts();
+    // }, []);
+    //
+
+
+    const fetchProducts = async (categoryName = '') => {
         try {
             const accessToken = localStorage.getItem('accessToken');
-            const response = await axios.get('https://muha-backender.org.kg/admin-panel/items/', {
+            const url = categoryName
+                ? `https://muha-backender.org.kg/admin-panel/items/?category__name=${categoryName}`
+                : 'https://muha-backender.org.kg/admin-panel/items/';
+
+            const response = await axios.get(url, {
                 headers: {
                     'accept': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
@@ -98,9 +124,15 @@ const TableAdminPage = () => {
     };
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        fetchProducts(selectedCategory);
+    }, [selectedCategory]);
 
+    const handleCategorySelect = (categoryName) => {
+        setSelectedCategory(categoryName);
+        setShowDropdown(false);
+
+        fetchProducts(categoryName === 'Все категории' ? '' : categoryName);
+    };
 
     useEffect(() => {
         fetchAvailableIngredients();
@@ -146,10 +178,6 @@ const TableAdminPage = () => {
         }
     }, [isModalOpen]);
 
-    const handleCategorySelect = (categoryName) => {
-        setSelectedCategory(categoryName);
-        setShowDropdown(false);
-    };
 
     const handlePaginationClick = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -221,6 +249,13 @@ const TableAdminPage = () => {
                   </span>
                         {showDropdown && (
                             <div className={styles.dropdown}>
+                                <div
+                            className={styles.menuCategory}
+                            key="all-categories"
+                            onClick={() => handleCategorySelect('Все категории')}
+                        >
+                            Все категории
+                        </div>
                                 {categories.map((category) => (
                                     <div
                                         className={styles.menuCategory}

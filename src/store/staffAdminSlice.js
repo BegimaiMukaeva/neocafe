@@ -54,14 +54,14 @@ export const fetchStaff = createAsyncThunk(
 
 
             const formattedData = employeesResponse.data.map(employee => {
-    console.log('branchId:', employee.branch, 'branchesData:', branchesData);
-    return {
-        ...employee,
-        position: convertPosition(employee.position),
-        branchName: getBranchNameById(employee.branch, branchesData),
-        schedule: formatSchedule(employee.schedule.workdays)
-    };
-});
+                console.log('branchId:', employee.branch, 'branchesData:', branchesData);
+                return {
+                    ...employee,
+                    position: convertPosition(employee.position),
+                    branchName: getBranchNameById(employee.branch, branchesData),
+                    schedule: formatSchedule(employee.schedule.workdays)
+                };
+            });
 
             dispatch(setStaffs(formattedData));
         } catch (error) {
@@ -77,24 +77,24 @@ function getBranchNameById(branchId, branchesData) {
 
 
 
-  const formatSchedule = (workdays) => {
+const formatSchedule = (workdays) => {
     const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     return workdays
         .filter(day => day.start_time && day.end_time)
         .map(day => dayNames[day.workday - 1])
         .join(', ');
-  };
+};
 
-  const convertPosition = (position) => {
+const convertPosition = (position) => {
     switch(position) {
-      case 'barista': return 'Бармен';
-      case 'waiter': return 'Официант';
-      default: return position;
+        case 'barista': return 'Бармен';
+        case 'waiter': return 'Официант';
+        default: return position;
     }
-  };
+};
 
 
-  export const deleteStaffAdmin = createAsyncThunk(
+export const deleteStaffAdmin = createAsyncThunk(
     'staffAdmin/deleteStaffAdmin',
     async (employeeId, { dispatch }) => {
         try {
@@ -131,6 +131,24 @@ export const editStaffAdmin = createAsyncThunk(
     }
 );
 
+export const fetchStaffBySearch = createAsyncThunk(
+    'staffAdmin/fetchStaffBySearch',
+    async (searchTerm, { dispatch }) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.get(`https://muha-backender.org.kg/admin-panel/employees/?search=${searchTerm}`, {
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Ошибка при поиске сотрудников:', error);
+        }
+    }
+);
+
 
 const staffAdminSlice = createSlice({
     name: 'staffAdmin',
@@ -147,10 +165,16 @@ const staffAdminSlice = createSlice({
         setStaffs: (state, action) => {
             return action.payload;
         },
+        updateEmployees: (state, action) => {
+            return action.payload;
+        },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        }
     }
 });
 
-export const { setStaffs, addStaffAdmin } = staffAdminSlice.actions;
+export const { setStaffs, addStaffAdmin, updateEmployees, setSearchTerm} = staffAdminSlice.actions;
 export default staffAdminSlice.reducer;
 
 

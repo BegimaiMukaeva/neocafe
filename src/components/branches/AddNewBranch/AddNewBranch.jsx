@@ -68,96 +68,58 @@ function AddNewBranch({ isVisible , onClose }) {
     });
 
 
+    const handleSubmit = async () => {
+        const branchData = {
+            name_of_shop: positionName,
+            address: positionAddress,
+            phone_number: positionPhone,
+            link_to_map: positionTwoGis,
+            workdays: daysOfWeek.map(({ key, number }) => ({
+                workday: schedule[key].isActive ? number + 1 :   null,
+                start_time: schedule[key].isActive ? schedule[key].from : null,
+                end_time: schedule[key].isActive ? schedule[key].to : null
+            })).filter(day => day.workday !== null)
+        };
 
-    // const submitBranchData = async () => {
-    //     try {
-    //         const accessToken = localStorage.getItem('accessToken');
-    //         const branchData = {
-    //             name_of_shop: positionName,
-    //             address: positionAddress,
-    //             phone_number: positionPhone,
-    //             link_to_map: positionTwoGis,
-    //             workdays: daysOfWeek.map(({ key, number }) => ({
-    //                 workday: schedule[key].isActive ? number + 1 :   null,
-    //                 start_time: schedule[key].isActive ? schedule[key].from : null,
-    //                 end_time: schedule[key].isActive ? schedule[key].to : null
-    //             })).filter(day => day.workday !== null)
-    //         };
-    //         const response = await axios.post('https://muha-backender.org.kg/branches/create/', branchData, {
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': `Bearer ${accessToken}`
-    //             }
-    //         });
-    //         return response.data.id;
-    //     } catch (error) {
-    //         console.error('Ошибка при создании филиала:', error);
-    //         return null;
-    //     }
-    // };
+        try {
+            const result = await dispatch(addNewBranch(branchData)).unwrap();
+            const branchId = result.id;
 
+            if (branchId) {
+                await uploadBranchImage(branchId);
+            }
 
-const handleSubmit = async () => {
-    const branchData = {
-                name_of_shop: positionName,
-                address: positionAddress,
-                phone_number: positionPhone,
-                link_to_map: positionTwoGis,
-                workdays: daysOfWeek.map(({ key, number }) => ({
-                    workday: schedule[key].isActive ? number + 1 :   null,
-                    start_time: schedule[key].isActive ? schedule[key].from : null,
-                    end_time: schedule[key].isActive ? schedule[key].to : null
-                })).filter(day => day.workday !== null)
-            };
-
-     try {
-        const result = await dispatch(addNewBranch(branchData)).unwrap();
-        const branchId = result.id;
-
-        if (branchId) {
-            await uploadBranchImage(branchId);
+            resetFields();
+            onClose();
+        } catch (error) {
+            setErrorMessages([error.message || "Ошибка при создании филиала"]);
         }
-
-        resetFields();
-        onClose();
-    } catch (error) {
-        setErrorMessages([error.message || "Ошибка при создании филиала"]);
-    }
-};
+    };
 
 
 
     const uploadBranchImage = async (branchId) => {
         console.log(branchId)
-    if (!image) return;
+        if (!image) return;
 
-    try {
-        const accessToken = localStorage.getItem('accessToken');
-        const formData = new FormData();
-        formData.append('image', image);
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const formData = new FormData();
+            formData.append('image', image);
 
-        const response = await axios.put(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
+            const response = await axios.put(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            console.log('Изображение филиала успешно загружено', response.data);
+        } catch (error) {
+            console.error('Ошибка при загрузке изображения филиала:', error.message);
+            if (error.response) {
+                console.error('Детали ошибки:', error.response.data);
             }
-        });
-        console.log('Изображение филиала успешно загружено', response.data);
-    } catch (error) {
-        console.error('Ошибка при загрузке изображения филиала:', error.message);
-        if (error.response) {
-            console.error('Детали ошибки:', error.response.data);
         }
-    }
-};
-
-    // const handleSubmit = async () => {
-    //     const branchId = await submitBranchData();
-    //     if (branchId) {
-    //         await uploadBranchImage(branchId);
-    //     }
-    //     resetFields();
-    //     onClose();
-    // };
+    };
 
 
     return (

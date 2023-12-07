@@ -1,6 +1,7 @@
 import React, { useState }  from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchProductsBySearch } from '../../store/compositionMenuSlice';
+import {searchTerm} from '../../store/compositionMenuSlice';
 import searchIcon from '../../img/searchAdminIcon.svg';
 import searchInputIcon from '../../img/searchIcon.svg';
 import styles from './SearchMenuAdmin.module.css';

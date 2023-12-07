@@ -1,8 +1,8 @@
 import React, { useState }  from 'react';
 import searchIcon from '../../../img/searchAdminIcon.svg';
 import styles from './EmployeesSearchAdmin.module.css';
-import { SearchOutlined } from '@ant-design/icons';
-import { Input } from 'antd';
+import { useDispatch } from 'react-redux';
+import {fetchStaffBySearch} from '../../../store/staffAdminSlice';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddNewStaffModel from '../AddNewStaffModel/AddNewStaffModel';
 import searchInputIcon from "../../../img/searchIcon.svg";
@@ -10,6 +10,11 @@ import searchInputIcon from "../../../img/searchIcon.svg";
 const EmployeesSearchAdmin = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const dispatch = useDispatch();
+
+    const handleSearchChange = (event) => {
+        dispatch(fetchStaffBySearch(event.target.value));
+    };
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -43,7 +48,11 @@ const EmployeesSearchAdmin = () => {
                     <span className={styles.searchIconInput}>
                         <img src={searchInputIcon} alt=""/>
                     </span>
-                    <input className={styles.searchInput} type="search" placeholder={'Поиск'}/>
+                    <input
+                        className={styles.searchInput}
+                        type="search"
+                        placeholder={'Поиск'}
+                        onChange={handleSearchChange}/>
                 </div>
                 <button className={styles.newPosition} onClick={openModal}>Создать</button>
                 <AddNewStaffModel

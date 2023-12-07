@@ -118,13 +118,13 @@
   padding: 8px 5px 8px 20px;
   cursor: pointer;
 }
-/*.dropdown .menuCategory:not(:first-child):hover {*/
-/*  background-color: #ddd;*/
-/*  color: #FF4B4B;*/
-/*}*/
-.dropdown .menuCategory:hover {
+.dropdown .menuCategory:not(:first-child):hover {
   background-color: #ddd;
   color: #FF4B4B;
+}
+.dropdown .menuCategory:hover {
+  background-color: #ddd;
+  color: black;
 }
 .dropdown .menuCategory img {
   width: 19px;

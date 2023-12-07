@@ -56,13 +56,14 @@ export const fetchProductsBySearch = createAsyncThunk(
   async (searchTerm, { dispatch }) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get(`https://muha-backender.org.kg/admin-panel/items/?search=${searchTerm}`, {
+      const response = await axios.get(`https://muha-backender.org.kg/admin-panel/items/?name=${searchTerm}`, {
         headers: {
           'accept': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
         }
       });
       return response.data;
+      // dispatch(setProducts(response.data))
     } catch (error) {
       console.error('Ошибка при поиске продуктов:', error);
     }
@@ -70,10 +71,10 @@ export const fetchProductsBySearch = createAsyncThunk(
 );
 
 
-
+//
 // const compositionMenuSlice = createSlice({
 //     name: 'compositionMenu',
-//     initialState:[],
+//     initialState,
 //     reducers: {
 //         addCompositionMenu: (state, action) => {
 //             const newItem = action.payload;
@@ -93,9 +94,11 @@ export const fetchProductsBySearch = createAsyncThunk(
 //     },
 //     }
 // });
+
 const compositionMenuSlice = createSlice({
     name: 'compositionMenu',
-    initialState,
+    initialState:[],
+    // initialState,
     reducers: {
         addCompositionMenu: (state, action) => {
             const newItem = action.payload;

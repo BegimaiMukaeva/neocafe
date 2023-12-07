@@ -1,8 +1,6 @@
 import React, { useState }  from 'react';
 import searchIcon from '../../../img/searchAdminIcon.svg';
 import styles from '../../SearchMenuAdmin/SearchMenuAdmin.module.css';
-import { SearchOutlined } from '@ant-design/icons';
-import { Input } from 'antd';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddNewBranch from '../../branches/AddNewBranch/AddNewBranch';
 import searchInputIcon from "../../../img/searchIcon.svg";
