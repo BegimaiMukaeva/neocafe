@@ -1,13 +1,33 @@
 import React, { useState }  from 'react';
+import { useDispatch } from 'react-redux';
+import {searchTerm} from '../../../store/warehouseAdminSlice';
 import searchIcon from '../../../img/searchAdminIcon.svg';
 import styles from '../../SearchMenuAdmin/SearchMenuAdmin.module.css';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
 import AddPositionModal from '../modalWarehouse/AddPositionModal/AddPositionModal';
 import searchInputIcon from "../../../img/searchIcon.svg";
+import { fetchIngredientsBySearch } from "../../../store/warehouseAdminSlice";
+import { fetchIngredients } from "../../../store/warehouseAdminSlice";
+import {fetchProducts} from "../../../store/warehouseAdminSlice";
+import {fetchProductsBySearch} from "../../../store/warehouseAdminSlice";
+
 
 const WarehouseSearchAdmin = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const dispatch = useDispatch();
+
+    const handleSearchChange = async (event) => {
+        const searchTerm = event.target.value;
+        if (searchTerm) {
+            dispatch(fetchIngredientsBySearch(searchTerm));
+            dispatch(fetchProductsBySearch(searchTerm));
+        } else {
+            dispatch(fetchIngredients());
+            dispatch(fetchProducts());
+        }
+    };
+
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -41,7 +61,12 @@ const WarehouseSearchAdmin = () => {
                     <span className={styles.searchIconInput}>
                         <img src={searchInputIcon} alt=""/>
                     </span>
-                    <input className={styles.searchInput} type="search" placeholder={'Поиск'}/>
+                    <input
+                        className={styles.searchInput}
+                        type="search"
+                        placeholder={'Поиск'}
+                        onChange={handleSearchChange}
+                    />
                 </div>
                 <button className={styles.newPosition} onClick={openModal}>Создать</button>
                 <AddPositionModal

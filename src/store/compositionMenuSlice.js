@@ -2,13 +2,6 @@ import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import axios from "axios";
 
 
-const initialState = {
-    products: [],
-    searchResults: [],
-    searchTerm: '',
-};
-
-
 export const addNewCompositionMenu = createAsyncThunk(
     'compositionMenu/addNewCompositionMenu',
     async (data, {rejectWithValue}) => {
@@ -59,8 +52,8 @@ export const fetchProductsBySearch = createAsyncThunk(
           'Authorization': `Bearer ${accessToken}`,
         }
       });
-      return response.data;
-      // dispatch(setProducts(response.data))
+      dispatch(setProducts(response.data))
+         return response.data;
     } catch (error) {
       console.error('Ошибка при поиске продуктов:', error);
     }

@@ -4,7 +4,7 @@ import axios from "axios";
 import styles from './AddNewBranch.module.css';
 import closeModal from "../../../img/X-black.svg";
 import productImage from "../../../img/CloudArrowUp.png";
-import { addNewBranch } from '../../../store/branchesAdminSlice';
+import {addNewBranch, fetchBranches} from '../../../store/branchesAdminSlice';
 
 function AddNewBranch({ isVisible , onClose }) {
     const dispatch = useDispatch();
@@ -13,6 +13,7 @@ function AddNewBranch({ isVisible , onClose }) {
     const [positionAddress, setPositionAddress] = useState("");
     const [positionPhone, setPositionPhone] = useState("");
     const [positionTwoGis, setPositionTwoGis] = useState("");
+    const [positionCountTable, setPositionCountTable] = useState("");
     const [errorMessages, setErrorMessages] = useState([]);
     const [schedule, setSchedule] = useState({
         monday: { isActive: false, from: "11:00", to: "22:00" },
@@ -23,7 +24,6 @@ function AddNewBranch({ isVisible , onClose }) {
         saturday: { isActive: false, from: "08:00", to: "17:00" },
         sunday: { isActive: false, from: "08:00", to: "17:00" },
     });
-    const [branchId, setBranchId] = useState(null);
     const daysOfWeek = [
         { key: 'monday', name: 'Понедельник', number: 0 },
         { key: 'tuesday', name: 'Вторник', number: 1 },
@@ -35,7 +35,7 @@ function AddNewBranch({ isVisible , onClose }) {
     ];
 
     const isFormValid = () => {
-        if (!positionName || !positionAddress || !positionPhone || !positionTwoGis ) {
+        if (!positionName || !positionAddress || !positionPhone || !positionTwoGis || !positionCountTable) {
             return false;
         }
         return true;
@@ -45,6 +45,7 @@ function AddNewBranch({ isVisible , onClose }) {
         setPositionAddress("");
         setPositionPhone("");
         setPositionTwoGis("");
+        setPositionCountTable("");
         setImage(null);
         setErrorMessages([]);
         setPositionTwoGis("");
@@ -67,6 +68,29 @@ function AddNewBranch({ isVisible , onClose }) {
         reader.onerror = error => reject(error);
     });
 
+    const uploadBranchImage = async (branchId) => {
+        const formData = new FormData();
+        formData.append('image', image);
+
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            await axios.put(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+
+            // Обновление Redux после успешной загрузки изображения
+            await dispatch(fetchBranches());
+
+            console.log('Изображение филиала успешно загружено');
+            resetFields();
+            onClose();
+        } catch (error) {
+            console.error('Ошибка при загрузке изображения филиала:', error);
+        }
+    };
+
 
     const handleSubmit = async () => {
         const branchData = {
@@ -74,6 +98,7 @@ function AddNewBranch({ isVisible , onClose }) {
             address: positionAddress,
             phone_number: positionPhone,
             link_to_map: positionTwoGis,
+            counts_of_tables: positionCountTable,
             workdays: daysOfWeek.map(({ key, number }) => ({
                 workday: schedule[key].isActive ? number + 1 :   null,
                 start_time: schedule[key].isActive ? schedule[key].from : null,
@@ -85,12 +110,10 @@ function AddNewBranch({ isVisible , onClose }) {
             const result = await dispatch(addNewBranch(branchData)).unwrap();
             const branchId = result.id;
 
-            if (branchId) {
+            if (branchId ) {
                 await uploadBranchImage(branchId);
             }
 
-            resetFields();
-            onClose();
         } catch (error) {
             setErrorMessages([error.message || "Ошибка при создании филиала"]);
         }
@@ -98,28 +121,6 @@ function AddNewBranch({ isVisible , onClose }) {
 
 
 
-    const uploadBranchImage = async (branchId) => {
-        console.log(branchId)
-        if (!image) return;
-
-        try {
-            const accessToken = localStorage.getItem('accessToken');
-            const formData = new FormData();
-            formData.append('image', image);
-
-            const response = await axios.put(`https://muha-backender.org.kg/branches/image/${branchId}/`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                }
-            });
-            console.log('Изображение филиала успешно загружено', response.data);
-        } catch (error) {
-            console.error('Ошибка при загрузке изображения филиала:', error.message);
-            if (error.response) {
-                console.error('Детали ошибки:', error.response.data);
-            }
-        }
-    };
 
 
     return (
@@ -197,6 +198,16 @@ function AddNewBranch({ isVisible , onClose }) {
                             placeholder="Вставьте ссылку на 2ГИС"
                             value={positionTwoGis}
                             onChange={e => setPositionTwoGis(e.target.value)}
+                            className={styles.textInput}
+                        />
+                    </label>
+
+                    <label className={styles.nameOfInput}>Количество столов
+                        <input
+                            type="number"
+                            placeholder="Количество столов в данном филиале"
+                            value={positionCountTable}
+                            onChange={e => setPositionCountTable(e.target.value)}
                             className={styles.textInput}
                         />
                     </label>

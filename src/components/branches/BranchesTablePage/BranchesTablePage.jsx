@@ -12,16 +12,21 @@ import EditDeleteItemModel from '../EditDeleteItemModel/EditDeleteItemModel';
 
 const BranchesTablePage = () => {
     const dispatch = useDispatch();
-    const branches = useSelector((state) => state.branchesAdmin.branches);
+    const branches = useSelector(state => state.branchesAdmin);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
     const [showDropdown, setShowDropdown] = useState(false);
     const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
 
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = branches.slice(indexOfFirstItem, indexOfLastItem);
+
     useEffect(() => {
         dispatch(fetchBranches());
-        }, [dispatch]);
+    }, [dispatch]);
 
 
     const handlePaginationClick = (pageNumber) => {
@@ -97,9 +102,6 @@ const BranchesTablePage = () => {
         };
     }, [showDropdown, styles.dropdown, styles.table__categoryTh]);
 
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = branches.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
         <div className={styles.main}>
@@ -118,7 +120,7 @@ const BranchesTablePage = () => {
                     </div>
                 </td>
                 <tbody>
-                {branches.slice(indexOfFirstItem, indexOfLastItem).map((branch, index) => (
+                {currentItems.map((branch, index) => (
                     <tr key={branch.id}>
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>{branch.name_of_shop}</td>

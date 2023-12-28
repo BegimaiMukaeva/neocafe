@@ -46,24 +46,38 @@ export const fetchStaff = createAsyncThunk(
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
-            console.log(employeesResponse.data)
-            if (!employeesResponse.data) {
-                console.error('Ответ сотрудников пуст');
-                return;
-            }
+            dispatch(setStaffs(employeesResponse.data))
+            // console.log(employeesResponse.data)
+            // if (!employeesResponse.data) {
+            //     console.error('Ответ сотрудников пуст');
+            //     return;
+            // }
+            //
+            // const formattedData = employeesResponse.data.map(employee => {
+            //     const branchName = getBranchNameById(employee.branch, branchesData);
+            //     const schedule = employee.schedule && employee.schedule.workdays
+            //         ? formatSchedule(employee.schedule.workdays)
+            //         : 'Нет графика';
+            //     return {
+            //         ...employee,
+            //         position: convertPosition(employee.position),
+            //         branchName,
+            //         schedule
+            //     };
+            // });
 
 
-            const formattedData = employeesResponse.data.map(employee => {
-                console.log('branchId:', employee.branch, 'branchesData:', branchesData);
-                return {
-                    ...employee,
-                    position: convertPosition(employee.position),
-                    branchName: getBranchNameById(employee.branch, branchesData),
-                    schedule: formatSchedule(employee.schedule.workdays)
-                };
-            });
+            // const formattedData = employeesResponse.data.map(employee => {
+            //     console.log('branchId:', employee.branch, 'branchesData:', branchesData);
+            //     return {
+            //         ...employee,
+            //         position: convertPosition(employee.position),
+            //         branchName: getBranchNameById(employee.branch, branchesData),
+            //         schedule: formatSchedule(employee.schedule.workdays)
+            //     };
+            // });
 
-            dispatch(setStaffs(formattedData));
+            // dispatch(setStaffs(formattedData));
         } catch (error) {
             console.error('Ошибка при получении продуктов:', error);
         }
@@ -77,13 +91,14 @@ function getBranchNameById(branchId, branchesData) {
 
 
 
-const formatSchedule = (workdays) => {
+  const formatSchedule = (workdays) => {
+    if (!workdays) return 'Нет графика';
     const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     return workdays
         .filter(day => day.start_time && day.end_time)
         .map(day => dayNames[day.workday - 1])
         .join(', ');
-};
+  };
 
 const convertPosition = (position) => {
     switch(position) {
@@ -103,7 +118,7 @@ export const deleteStaffAdmin = createAsyncThunk(
             });
             if (response.status === 200) {
                 console.log("Сотрудник удален:", employeeId);
-                dispatch(fetchStaff()); // Загрузка обновленного списка сотрудников
+                dispatch(fetchStaff());
             }
         } catch (error) {
             console.error('Ошибка при удалении сотрудника:', error);
@@ -123,7 +138,7 @@ export const editStaffAdmin = createAsyncThunk(
             });
             if (response.status === 200) {
                 console.log("Сотрудник обновлен:", employeeId);
-                dispatch(fetchStaff()); // Перезагружаем список сотрудников
+                dispatch(fetchStaff());
             }
         } catch (error) {
             console.error('Ошибка при обновлении сотрудника:', error);
@@ -136,12 +151,13 @@ export const fetchStaffBySearch = createAsyncThunk(
     async (searchTerm, { dispatch }) => {
         try {
             const accessToken = localStorage.getItem('accessToken');
-            const response = await axios.get(`https://muha-backender.org.kg/admin-panel/employees/?search=${searchTerm}`, {
+            const response = await axios.get(`https://muha-backender.org.kg/admin-panel/employees/?name=${searchTerm}`, {
                 headers: {
                     'accept': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
+            dispatch(setStaffs(response.data))
             return response.data;
         } catch (error) {
             console.error('Ошибка при поиске сотрудников:', error);
@@ -170,11 +186,16 @@ const staffAdminSlice = createSlice({
         },
         setSearchTerm: (state, action) => {
             state.searchTerm = action.payload;
+        },
+         extraReducers: {
+            [fetchStaffBySearch.fulfilled]: (state, action) => {
+                state.searchResults = action.payload;
+            },
         }
     }
 });
 
-export const { setStaffs, addStaffAdmin, updateEmployees, setSearchTerm} = staffAdminSlice.actions;
+export const { setStaffs, updateEmployees} = staffAdminSlice.actions;
 export default staffAdminSlice.reducer;
 
 

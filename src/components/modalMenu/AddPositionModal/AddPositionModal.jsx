@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import {useDispatch} from "react-redux";
 import axios from 'axios';
 import styles from './AddPositionModal.module.css';
@@ -7,6 +7,10 @@ import productImage from "../../../img/CloudArrowUp.png";
 import plusSvg from '../../../img/Plus-white.svg';
 import {addNewCompositionMenu} from "../../../store/compositionMenuSlice";
 import { fetchProducts} from '../../../store/compositionMenuSlice';
+import DropdownComponent from '../../../ui/SelectBox/DropdownComponent'
+import openDropdownVector from "../../../img/dropdownVectorOpen.svg";
+import dropdownVector from "../../../img/dropdown-vector.svg";
+import {fetchBranches} from "../../../store/branchesAdminSlice";
 
 function AddPositionModal({ isVisible, onClose, options }) {
     const [positionName, setPositionName] = useState("");
@@ -21,6 +25,31 @@ function AddPositionModal({ isVisible, onClose, options }) {
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [availableIngredients, setAvailableIngredients] = useState([]);
     const dispatch = useDispatch();
+    const dropdownRef = useRef();
+
+    const [dropdownCategoryOpen, setDropdownCategoryOpen] = useState(false);
+
+    const toggleDropdownCategory = () => {
+        setDropdownCategoryOpen(!dropdownCategoryOpen);
+    };
+
+    const handleCategorySelect = (categoryId, categoryName) => {
+        setSelectedCategoryId(categoryId);
+        setSelectedCategory(categoryName);
+        setDropdownCategoryOpen(false);
+    };
+
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownCategoryOpen(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const fetchAvailableIngredients = async () => {
         try {
@@ -65,15 +94,15 @@ function AddPositionModal({ isVisible, onClose, options }) {
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
     };
-
-    const handleCategorySelect = (categoryId, categoryName, event) => {
-        event.stopPropagation();
-        setSelectedCategoryId(categoryId);
-        setSelectedCategory(categoryName);
-        setTimeout(() => setShowDropdown(false), 0);
-        console.log("Текущие ингредиенты:", ingredients);
-
-    };
+    //
+    // const handleCategorySelect = (categoryId, categoryName, event) => {
+    //     event.stopPropagation();
+    //     setSelectedCategoryId(categoryId);
+    //     setSelectedCategory(categoryName);
+    //     setTimeout(() => setShowDropdown(false), 0);
+    //     console.log("Текущие ингредиенты:", ingredients);
+    //
+    // };
     const handleSelectIngredient = (selectedIngredientName, amount, index) => {
         const selectedIngredient = availableIngredients.find(ingredient => ingredient.name === selectedIngredientName);
         if (selectedIngredient) {
@@ -123,7 +152,6 @@ function AddPositionModal({ isVisible, onClose, options }) {
 
         try {
             const accessToken = localStorage.getItem('accessToken');
-
             await axios.put(`https://muha-backender.org.kg/admin-panel/put-image-to-item/${positionId}/`, formData, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -140,30 +168,31 @@ function AddPositionModal({ isVisible, onClose, options }) {
     };
 
 
-const handleSubmit = async () => {
-    const data = {
-        name: positionName,
-        description: description,
-        category: parseInt(selectedCategoryId),
-        price: parseFloat(price),
-        is_available: true,
-        composition: ingredients.map(ingredient => ({
-            ingredient: ingredient.id,
-            quantity: parseFloat(ingredient.amount)
-        }))
-    };
 
-    try {
-        const actionResult = await dispatch(addNewCompositionMenu(data));
-        const positionId = actionResult.payload;
+    const handleSubmit = async () => {
+        const data = {
+            name: positionName,
+            description: description,
+            category: parseInt(selectedCategoryId),
+            price: parseFloat(price),
+            is_available: true,
+            composition: ingredients.map(ingredient => ({
+                ingredient: ingredient.id,
+                quantity: parseFloat(ingredient.amount)
+            }))
+        };
 
-        if (positionId && image) {
-            await uploadImage(positionId);
+        try {
+            const actionResult = await dispatch(addNewCompositionMenu(data));
+            const positionId = actionResult.payload;
+
+            if (positionId && image) {
+                await uploadImage(positionId);
+            }
+        } catch (error) {
+            console.error('Ошибка при создании позиции:', error);
         }
-    } catch (error) {
-        console.error('Ошибка при создании позиции:', error);
-    }
-};
+    };
 
 
 
@@ -236,51 +265,33 @@ const handleSubmit = async () => {
 
 
                     <div className={styles.categoryAndPrice}>
-                        {/*<label className={styles.nameOfInput}>Категория*/}
-                        {/*//     <div className={styles.dropdown}>*/}
-                        {/*//         <button className={`${styles.dropdownButton} ${showDropdown ? styles.dropdownButtonOpen : ''}`} onClick={toggleDropdown}>*/}
-                        {/*//               {selectedCategory || "Выберите категорию"}*/}
-                        {/*//               <span className={styles.dropdownArrow}>*/}
-                        {/*//                 <img*/}
-                        {/*//                   src={showDropdown ? openDropdownVector : dropdownVector}*/}
-                        {/*//                   alt=""*/}
-                        {/*//                 />*/}
-                        {/*//               </span>*/}
-                        {/*//         </button>*/}
-                        {/*//         {showDropdown && (*/}
-                        {/*//           <div className={styles.dropdownMenu}>*/}
-                        {/*//             {categories.map((category) => (*/}
-                        {/*//                   <div*/}
-                        {/*                      className={styles.dropdownItem}*/}
-                        {/*                      key={category.id}*/}
-                        {/*                      onClick={(event) => handleCategorySelect(category.id, category.name, event)}*/}
-                        {/*                  >*/}
-                        {/*                      {category.name}*/}
-                        {/*                  </div>*/}
-                        {/*              ))}*/}
-                        {/*          </div>*/}
-                        {/*        )}*/}
-                        {/*    </div>*/}
-                        {/*</label>*/}
                         <label className={styles.nameOfInput} htmlFor="">Категория
-                            <select
-                                value={selectedCategoryId}
-                                onChange={e => {
-                                    const selectedId = e.target.value;
-                                    const selectedCat = categories.find(cat => cat.id.toString() === selectedId);
-                                    setSelectedCategory(selectedCat ? selectedCat.name : '');
-                                    setSelectedCategoryId(selectedId);
-                                }}
-                                className={styles.selectInput}
-                            >
-                                <option value="">Выберите категорию</option>
-                                {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className={styles.dropdown} ref={dropdownRef}>
+                                <button
+                                    className={`${styles.dropdownButton} ${dropdownCategoryOpen ? styles.dropdownButtonOpen : ''}`}
+                                    onClick={toggleDropdownCategory}
+                                >
+                                    {selectedCategory || "Выберите категорию"}
+                                    <span className={styles.dropdownArrow}>
+                                <img src={dropdownCategoryOpen ? openDropdownVector : dropdownVector} alt="" />
+                            </span>
+                                </button>
+                                {dropdownCategoryOpen && (
+                                    <div className={styles.dropdownMenu}>
+                                        {categories.map((category) => (
+                                            <div
+                                                className={styles.dropdownItem}
+                                                key={category.id}
+                                                onClick={() => handleCategorySelect(category.id, category.name)}
+                                            >
+                                                {category.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </label>
+
 
                         <label className={styles.nameOfInput} htmlFor="">Стоимость
                             <input
@@ -291,8 +302,8 @@ const handleSubmit = async () => {
                                 className={styles.numberInput}
                             />
                         </label>
-
                     </div>
+
 
                     <p className={styles.imageLabel}>Состав блюда и граммовка</p>
                     <div className={styles.ingredientsList}>

@@ -7,11 +7,19 @@ import plusSvg from "../../../../img/Plus-white.svg";
 import openDropdownVector from "../../../../img/dropdownVectorOpen.svg";
 import dropdownVector from "../../../../img/dropdown-vector.svg";
 import axios from "axios";
+import productImage from "../../../../img/CloudArrowUp.png";
+import {fetchProducts} from "../../../../store/compositionMenuSlice";
 
 function AddPositionModal({ isVisible, onClose }) {
     const dispatch = useDispatch();
+    const [image, setImage] = useState(null);
+    const [description, setDescription] = useState("");
+    const [categories, setCategories] = useState([]);
     const [positionName, setPositionName] = useState("");
+    const [price, setPrice] = useState("");
     const [positionLimit, setPositionLimit] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
     const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
@@ -23,6 +31,27 @@ function AddPositionModal({ isVisible, onClose }) {
     const dropdownBranchesRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState({});
 
+
+    const fetchCategories = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.get('https://muha-backender.org.kg/admin-panel/categories/', {
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Ошибка при получении категорий: ', error);
+        }
+    };
+
+    useEffect(() => {
+        if (!showDropdown) {
+            fetchCategories();
+        }
+    }, [showDropdown]);
 
     const fetchBranches = async () => {
         try {
@@ -66,24 +95,73 @@ function AddPositionModal({ isVisible, onClose }) {
             minimal_limit: Number(positionLimit),
         }));
 
+    const uploadImage = async (productId) => {
+        const formData = new FormData();
+        formData.append('image', image);
 
-    const handleSubmit = () => {
-        const productData = {
-            name: positionName,
-            category: productCategory,
-            available_at_branches: availableAtBranches,
-        };
-        dispatch(addProduct(productData))
-            .then(() => {
-                onClose();
-                resetFields();
-            })
-            .catch(error => {
-                console.error('Ошибка при добавлении продукции:', error);
-                setErrorMessage("Произошла ошибка при добавлении продукции.");
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            await axios.put(`https://muha-backender.org.kg/admin-panel/ready-made-products/put-image-to-item/${productId}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${accessToken}`,
+                }
             });
+            dispatch(fetchProducts());
+            console.log('Изображение успешно загружено');
+            onClose ();
+            resetFields();
+        } catch (error) {
+            console.error('Ошибка при загрузке изображения:', error);
+        }
     };
 
+
+    // const handleSubmit = () => {
+    //     const productData = {
+    //         name: positionName,
+    //         category: productCategory,
+    //         price: price,
+    //         description: description,
+    //         selectedCategoryId: selectedCategoryId,
+    //         available_at_branches: availableAtBranches,
+    //     };
+    //     dispatch(addProduct(productData))
+    //         .then(() => {
+    //             onClose();
+    //             resetFields();
+    //         })
+    //         .catch(error => {
+    //             console.error('Ошибка при добавлении продукции:', error);
+    //             setErrorMessage("Произошла ошибка при добавлении продукции.");
+    //         });
+    // };
+    //
+
+    const handleSubmit = async () => {
+    const productData = {
+        name: positionName,
+        category: productCategory,
+        price: price,
+        description: description,
+        selectedCategoryId: selectedCategoryId,
+        available_at_branches: availableAtBranches,
+    };
+
+    try {
+        const actionResult = await dispatch(addProduct(productData));
+        const productId = actionResult.payload;
+
+        if (productId && image) {
+            await uploadImage(productId);
+        }
+        onClose();
+        resetFields();
+    } catch (error) {
+        console.error('Ошибка при добавлении продукции:', error);
+        setErrorMessage("Произошла ошибка при добавлении продукции.");
+    }
+};
 
     const toggleDropdownBranch = (index) => {
         fetchBranches();
@@ -159,6 +237,28 @@ function AddPositionModal({ isVisible, onClose }) {
                             <img src={closeModalImg} alt="Закрыть"/>
                         </button>
                     </div>
+                    <div className={styles.imageUpload}>
+                        <label htmlFor="imageUpload" className={styles.imageLabel}>
+                            Добавьте фотографию к позиции
+                        </label>
+                        <div className={styles.imageBorder}>
+                            <div className={styles.imagePreview}>
+                                {!image ? (
+                                    <img src={productImage} alt="Иконка загрузки" />
+                                ) : (
+                                    <img src={URL.createObjectURL(image)} alt="Предварительный просмотр" />
+                                )}
+                                <p className={styles.imageText}>Перетащите изображение для изменения <br/> или <span className={styles.imageChangeText}>обзор</span></p>
+                            </div>
+                        </div>
+                        <input
+                            type="file"
+                            id="imageUpload"
+                            accept=".jpg, .jpeg, .png"
+                            onChange={(e) => setImage(e.target.files[0])}
+                            className={styles.imageInput}
+                        />
+                    </div>
 
                     <p className={styles.imageLabel}>Наименование, категория и стоимость</p>
                     <label className={styles.nameOfInput}>Наименование
@@ -170,9 +270,48 @@ function AddPositionModal({ isVisible, onClose }) {
                             className={styles.textInput}
                         />
                     </label>
+                    <label className={styles.nameOfInput}>Описание
+                        <textarea
+                            placeholder="Описание"
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            className={styles.textArea}
+                        />
+                    </label>
+
+                    <div className={styles.categoryAndPrice}>
+                        <label className={styles.nameOfInput} htmlFor="">Категория
+                            <select
+                                value={selectedCategoryId}
+                                onChange={e => {
+                                    const selectedId = e.target.value;
+                                    const selectedCat = categories.find(cat => cat.id.toString() === selectedId);
+                                    setSelectedCategory(selectedCat ? selectedCat.name : '');
+                                    setSelectedCategoryId(selectedId);
+                                }}
+                                className={styles.selectedInput}
+                            >
+                                <option value="">Выберите категорию</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label className={styles.nameOfInput} htmlFor="">Стоимость
+                            <input
+                                type="number"
+                                placeholder="Введите стоимость"
+                                value={price}
+                                onChange={e => setPrice(e.target.value)}
+                                className={styles.numberInput}
+                            />
+                        </label>
+                    </div>
 
                     <div className={styles.category}>
-
                         {ingredients.map((ingredient, index) => (
                             <div key={index} className={styles.category}>
                                 <div>

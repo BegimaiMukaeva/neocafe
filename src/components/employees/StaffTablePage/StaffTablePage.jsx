@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchStaff } from '../../../store/staffAdminSlice';
+import {setStaffs} from '../../../store/staffAdminSlice';
 import {updateEmployees} from '../../../store/staffAdminSlice';
 import styles from "./StaffTablePage.module.css";
 import {
@@ -27,6 +28,9 @@ const StaffTablePage = () => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, [dispatch]);
 
 
   // useEffect(() => {
@@ -74,48 +78,71 @@ const StaffTablePage = () => {
   }, [dispatch]);
 
 
-const formatSchedule = (workdays) => {
-    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-    return workdays
-        .filter(day => day.start_time && day.end_time)
-        .map(day => dayNames[day.workday - 1])
-        .join(', ');
-};
+  // const formatSchedule = (workdays) => {
+  //   const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  //   return workdays
+  //       .filter(day => day.start_time && day.end_time)
+  //       .map(day => dayNames[day.workday - 1])
+  //       .join(', ');
+  // };
 
-const fetchEmployeesByBranch = async (branchId = '') => {
-    try {
-        const url = branchId
-            ? `https://muha-backender.org.kg/admin-panel/employees/?branch=${branchId}`
-            : 'https://muha-backender.org.kg/admin-panel/employees/';
 
-        const response = await axios.get(url, {
-            headers: { 'accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-        });
 
-        const employees = response.data.map(employee => ({
-            ...employee,
-            schedule: formatSchedule(employee.schedule.workdays)
-        }));
-
-        dispatch(updateEmployees(employees));
-    } catch (error) {
-        console.error('Ошибка при получении списка сотрудников:', error);
+  const fetchEmployeesByBranch = async (branchId) => {
+    let url = 'https://muha-backender.org.kg/admin-panel/employees/';
+    if (branchId && branchId !== 'Все филиалы') {
+      url += `?branch=${branchId}`;
     }
-};
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      });
+
+      dispatch(setStaffs(response.data));
+    } catch (error) {
+      console.error('Ошибка при получении списка сотрудников:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchEmployeesByBranch(selectedCategory);
+  }, [selectedCategory]);
 
 
   function getBranchNameById(branchId, branchesData) {
     const branch = branchesData.find(b => b.id === branchId);
     return branch ? branch.name : 'Неизвестный филиал';
   }
+
   const handleCategorySelect = (branchName, branchId) => {
     setSelectedCategory(branchName);
-    setSelectedBranchId(branchId);
+    setSelectedBranchId(branchId === 'Все филиалы' ? '' : branchId);
     setShowDropdown(false);
-    fetchEmployeesByBranch(branchId);
+    fetchEmployeesByBranch(branchId === 'Все филиалы' ? '' : branchId);
   };
 
 
+  const formatSchedule = (workdays) => {
+    if (!workdays || workdays.length === 0) return 'Нет графика';
+    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    return workdays
+        .filter(day => day.start_time && day.end_time)
+        .map(day => dayNames[day.workday - 1])
+        .join(', ');
+  };
+
+  const convertPosition = (position) => {
+    switch(position) {
+      case 'barista': return 'Бармен';
+      case 'waiter': return 'Официант';
+      default: return position;
+    }
+  };
 
   //
   // useEffect(() => {
@@ -139,9 +166,6 @@ const fetchEmployeesByBranch = async (branchId = '') => {
   //   fetchEmployees();
   // }, []);
 
-  useEffect(() => {
-    dispatch(fetchStaff());
-  }, [dispatch]);
 
   // const formatSchedule = (workdays) => {
   //   const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -252,10 +276,10 @@ const fetchEmployeesByBranch = async (branchId = '') => {
               <tr key={employee.id}>
                 <td>{indexOfFirstItem + index + 1}</td>
                 <td>{employee.first_name}</td>
-                <td>{employee.position}</td>
+                <td>{convertPosition(employee.position)}</td>
                 <td>{getBranchNameById(employee.branch, branches)}</td>
                 <td>{employee.phone_number}</td>
-                <td>{employee.schedule}</td>
+                <td>{formatSchedule(employee.schedule.workdays)}</td>
                 <td className={styles.table__branch}>
                   <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(employee.id)} />
                   <EditDeleteItemModel

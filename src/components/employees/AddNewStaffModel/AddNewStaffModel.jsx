@@ -281,8 +281,8 @@ function AddNewStaffModel({ isVisible , onClose}) {
                                     >
                                         {positionBranch || "Выберите филиал"}
                                         <span className={styles.dropdownArrow}>
-                <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
-              </span>
+                                            <img src={dropdownOpen[index] ? openDropdownVector : dropdownVector} alt="" />
+                                        </span>
                                     </button>
                                     {dropdownOpen[index] && (
                                         <div className={styles.dropdownMenu}>

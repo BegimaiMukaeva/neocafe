@@ -1,6 +1,7 @@
 import React, { useState }  from 'react';
 import searchIcon from '../../../img/searchAdminIcon.svg';
-import styles from './EmployeesSearchAdmin.module.css';
+// import styles from './EmployeesSearchAdmin.module.css';
+import styles from '../../SearchMenuAdmin/SearchMenuAdmin.module.css';
 import { useDispatch } from 'react-redux';
 import {fetchStaffBySearch} from '../../../store/staffAdminSlice';
 import NotificationsAdminPage from '../../modalMenu/NotificationsAdminPage/NotificationsAdminPage';
@@ -59,13 +60,6 @@ const EmployeesSearchAdmin = () => {
                     isVisible={isAddModalVisible}
                     onClose={cancelModal}
                 />
-                <label className={styles.filterStaffTitle}>
-                    <input
-                        type="checkbox"
-                        className={styles.checkboxDay}
-                    />
-                    Фильтр по рейтингу
-                </label>
             </div>
         </div>
     );

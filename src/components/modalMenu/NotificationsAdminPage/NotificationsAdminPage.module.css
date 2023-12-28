@@ -1,7 +1,7 @@
 .modal {
   position: fixed;
-  top: 87px;
-  right: 80px;
+  top: 55px;
+  right: 110px;
   width: 440px;
   height: auto;
   border-radius: 6px;
@@ -43,11 +43,11 @@
 }
 .modalNotificationsMessage {
   width: 408px;
-  height: 118px;
+  height: 122px;
   border-radius: 6px;
   background-color: #ffffff;
   padding: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .modalNotificationsTime {
   display: flex;
@@ -64,7 +64,7 @@
   margin: 3px;
 }
 .modalNotificationsValue {
-  margin: 8px 0;
+  margin: 5px 0;
 }
 .modalNotificationsValue span {
   font-family: Nunito;
@@ -75,4 +75,13 @@
 .notificationsProductNone {
   color: #00315D;
   font-weight: 700;
+}
+.modalContent {
+  max-height: 500px;
+  width: 440px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: start;
 }

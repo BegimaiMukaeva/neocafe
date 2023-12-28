@@ -21,8 +21,6 @@ const TableAdminPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;
     const products = useSelector(state => state.compositionMenu);
-    // const products = useSelector(state => state.compositionMenu.products);
-    // const searchResults = useSelector(state => state.compositionMenu.searchResults);
 
 
     const [showDropdown, setShowDropdown] = useState(false);
@@ -40,16 +38,6 @@ const TableAdminPage = () => {
     const [categoryIdToDelete, setCategoryIdToDelete] = useState(null);
     const [categoryNameToDelete, setCategoryNameToDelete] = useState('');
     const [availableIngredients, setAvailableIngredients] = useState([]);
-
-// const displayProducts = searchResults.length > 0 ? searchResults : products;
-    // const displayProducts = (searchResults && searchResults.length > 0) ? searchResults : products;
-
-    // const indexOfLastItem = currentPage * itemsPerPage;
-    // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    // const currentItems = displayProducts.slice(indexOfFirstItem, indexOfLastItem);
-// const currentItems = displayProducts ? displayProducts.slice(indexOfFirstItem, indexOfLastItem) : [];
-
-// const totalPages = products ? Math.ceil(products.length / itemsPerPage) : 0;
 
 
     const fetchAvailableIngredients = async () => {

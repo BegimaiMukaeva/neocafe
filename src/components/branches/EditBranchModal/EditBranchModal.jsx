@@ -12,6 +12,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
     const [positionAddress, setPositionAddress] = useState('');
     const [positionPhone, setPositionPhone] = useState('');
     const [positionTwoGis, setPositionTwoGis] = useState('');
+    const [positionCountTable, setPositionCountTable] = useState('');
     const [image, setImage] = useState(null);
     const [editedSchedule, setEditedSchedule] = useState({
         monday: { isActive: false, from: '08:00', to: '17:00' },
@@ -52,6 +53,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
             setPositionAddress(data.address);
             setPositionPhone(parseFloat(data.phone_number));
             setPositionTwoGis(data.link_to_map);
+            setPositionCountTable(data.counts_of_tables);
             setImage(data.image);
 
             console.log("Fetched Data:", data);
@@ -117,6 +119,7 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
             address: positionAddress,
             phone_number: formatPhoneNumber(positionPhone),
             link_to_map: positionTwoGis,
+            counts_of_tables: positionCountTable,
         };
         dispatch(editBranch({ branchId, updatedData }))
             .then(() => {
@@ -256,6 +259,16 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
                             placeholder="Вставьте ссылку на 2ГИС"
                             value={positionTwoGis}
                             onChange={e => setPositionTwoGis(e.target.value)}
+                            className={styles.textInput}
+                        />
+                    </label>
+
+                    <label className={styles.nameOfInput}>Количество столов
+                        <input
+                            type="number"
+                            placeholder="Количество столов в данном филиале"
+                            value={positionCountTable}
+                            onChange={e => setPositionCountTable(e.target.value)}
                             className={styles.textInput}
                         />
                     </label>
