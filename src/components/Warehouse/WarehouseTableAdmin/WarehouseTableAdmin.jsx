@@ -99,7 +99,7 @@ const WarehouseTableAdmin = () => {
                     <tr key={product.id}>
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{product.name}</td>
-                        <td>{product.total_quantity}</td>
+                        <td>{product.total_quantity} шт</td>
                         <td>{product.date_of_arrival}</td>
                         <td className={styles.table__branch}>
                             <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(product.id)}/>

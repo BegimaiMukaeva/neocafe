@@ -20,7 +20,7 @@ function AddPositionModal({ isVisible, onClose }) {
     const [positionLimit, setPositionLimit] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-    const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
+    // const [branchAllocations, setBranchAllocations] = useState([{ branch: { id: null, name: '' }, amount: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
     const [ingredients, setIngredients] = useState([{ name: "", amount: "" }]);
     const [productCategory, setProductCategory] = useState("");
@@ -30,7 +30,14 @@ function AddPositionModal({ isVisible, onClose }) {
     const dropdownRef = useRef(null);
     const dropdownBranchesRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState({});
+    const [measurementUnit, setMeasurementUnit] = useState('');
 
+    const [branchAllocations, setBranchAllocations] = useState([{
+        branch: { id: null, name: '' },
+        amount: "",
+        positionLimit: "",
+        measurementUnit: ""
+    }]);
 
     const fetchCategories = async () => {
         try {
@@ -92,8 +99,11 @@ function AddPositionModal({ isVisible, onClose }) {
         .map(allocation => ({
             branch: allocation.branch.id,
             quantity: Number(allocation.amount),
-            minimal_limit: Number(positionLimit),
+            minimal_limit: Number(allocation.positionLimit) || 0, // Используйте positionLimit из allocation
         }));
+    const handleMeasurementUnitChange = (e) => {
+        setMeasurementUnit(e.target.value);
+    };
 
     const uploadImage = async (productId) => {
         const formData = new FormData();
@@ -139,29 +149,30 @@ function AddPositionModal({ isVisible, onClose }) {
     //
 
     const handleSubmit = async () => {
-    const productData = {
-        name: positionName,
-        category: productCategory,
-        price: price,
-        description: description,
-        selectedCategoryId: selectedCategoryId,
-        available_at_branches: availableAtBranches,
-    };
+        const productData = {
+            name: positionName,
+            category: productCategory,
+            price: price,
+            description: description,
+            selectedCategoryId: selectedCategoryId,
+            available_at_branches: availableAtBranches,
+            measurement_unit: measurementUnit,
+        };
+        console.log('Submitting product data:', productData);
+        try {
+            const actionResult = await dispatch(addProduct(productData));
+            const productId = actionResult.payload;
 
-    try {
-        const actionResult = await dispatch(addProduct(productData));
-        const productId = actionResult.payload;
-
-        if (productId && image) {
-            await uploadImage(productId);
+            if (productId && image) {
+                await uploadImage(productId);
+            }
+            onClose();
+            resetFields();
+        } catch (error) {
+            console.error('Ошибка при добавлении продукции:', error);
+            setErrorMessage("Произошла ошибка при добавлении продукции.");
         }
-        onClose();
-        resetFields();
-    } catch (error) {
-        console.error('Ошибка при добавлении продукции:', error);
-        setErrorMessage("Произошла ошибка при добавлении продукции.");
-    }
-};
+    };
 
     const toggleDropdownBranch = (index) => {
         fetchBranches();
@@ -177,7 +188,7 @@ function AddPositionModal({ isVisible, onClose }) {
 
     const handleCategorySelect = (category) => {
         setProductCategory(category);
-        setShowDropdown(false);
+        setShowDropdown(true);
     };
 
     const handleBranchSelect = (branchId, branchName, index) => {
@@ -185,17 +196,35 @@ function AddPositionModal({ isVisible, onClose }) {
         updatedAllocations[index].branch = { id: branchId, name: branchName };
         setBranchAllocations(updatedAllocations);
     };
+    // const updateBranchQuantity = (index, amount) => {
+    //     const updatedAllocations = [...branchAllocations];
+    //     updatedAllocations[index].amount = amount;
+    //     setBranchAllocations(updatedAllocations);
+    // };
+    //
+
+    const addBranchAllocation = () => {
+        setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
+    };
+
     const updateBranchQuantity = (index, amount) => {
         const updatedAllocations = [...branchAllocations];
         updatedAllocations[index].amount = amount;
         setBranchAllocations(updatedAllocations);
     };
 
-
-
-    const addBranchAllocation = () => {
-        setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
+    const updatePositionLimit = (index, limit) => {
+        const updatedAllocations = [...branchAllocations];
+        updatedAllocations[index].positionLimit = limit;
+        setBranchAllocations(updatedAllocations);
     };
+
+    const updateMeasurementUnit = (index, unit) => {
+        const updatedAllocations = [...branchAllocations];
+        updatedAllocations[index].measurementUnit = unit;
+        setBranchAllocations(updatedAllocations);
+    };
+
 
     const updateBranchAllocation = (index, field, value) => {
         const updatedAllocations = [...branchAllocations];
@@ -211,16 +240,19 @@ function AddPositionModal({ isVisible, onClose }) {
 
 
     const isFormValid = () => {
-        return positionName && positionLimit;
+        return positionName ;
     };
 
 
     const resetFields = () => {
         setPositionName("");
+        setDescription("");
+        setPrice("");
         setIngredients([{ name: "", amount: "" }]);
         setPositionLimit("");
         setBranchAllocations([{ branch: "", amount: "" }]);
         setErrorMessage("");
+        setImage ("");
     };
 
 
@@ -323,8 +355,8 @@ function AddPositionModal({ isVisible, onClose }) {
                                             >
                                                 {productCategory || "Выберите категорию"}
                                                 <span className={styles.dropdownArrow}>
-                                    <img src={showDropdownBranches ? openDropdownVector : dropdownVector} alt="" />
-                                  </span>
+                                                    <img src={showDropdownBranches ? openDropdownVector : dropdownVector} alt="" />
+                                                </span>
                                             </button>
                                             {showDropdown && (
                                                 <div className={styles.dropdownMenu}>
@@ -355,7 +387,7 @@ function AddPositionModal({ isVisible, onClose }) {
                                     <div className={styles.dropdown}>
                                         <button
                                             className={`${styles.dropdownButton} ${dropdownOpen[index] ? styles.dropdownButtonOpen : ''}`}
-                                            onClick={() => toggleDropdownBranch(index)} // Измените здесь
+                                            onClick={() => toggleDropdownBranch(index)}
                                         >
                                             {allocation.branch.name || "Выберите филиал"}
                                             <span className={styles.dropdownArrow}>
@@ -391,24 +423,50 @@ function AddPositionModal({ isVisible, onClose }) {
                                     />
                                 </label>
                             </div>
+                            {/*<div className={styles.compositionOfDish}>*/}
+                            {/*    <label className={styles.nameOfInput}>Минимальный лимит*/}
+                            {/*        <input*/}
+                            {/*            type="text"*/}
+                            {/*            placeholder="Например: 2 кг"*/}
+                            {/*            value={positionLimit}*/}
+                            {/*            onChange={e => setPositionLimit(e.target.value)}*/}
+                            {/*            className={styles.minimalLimit}*/}
+                            {/*        />*/}
+                            {/*    </label>*/}
+                            {/*    <label className={styles.nameOfInput} htmlFor="">Изм-я*/}
+                            {/*        <select*/}
+                            {/*            className={styles.selectInput}*/}
+                            {/*            value={measurementUnit} // Привязка состояния к select*/}
+                            {/*            onChange={handleMeasurementUnitChange}*/}
+                            {/*        >*/}
+                            {/*            <option value="g">грамм</option>*/}
+                            {/*            <option value="kg">кг</option>*/}
+                            {/*            <option value="ml">мл</option>*/}
+                            {/*            <option value="l">литр</option>*/}
+                            {/*        </select>*/}
+                            {/*    </label>*/}
+                            {/*</div>*/}
+
                             <div className={styles.compositionOfDish}>
                                 <label className={styles.nameOfInput}>Минимальный лимит
                                     <input
                                         type="text"
                                         placeholder="Например: 2 кг"
-                                        value={positionLimit}
-                                        onChange={e => setPositionLimit(e.target.value)}
+                                        value={allocation.positionLimit}
+                                        onChange={e => updatePositionLimit(index, e.target.value)}
                                         className={styles.minimalLimit}
                                     />
                                 </label>
-                                <label className={styles.nameOfInput}  htmlFor="">Изм-я
+                                <label className={styles.nameOfInput} htmlFor="">Изм-я
                                     <select
                                         className={styles.selectInput}
+                                        value={allocation.measurementUnit}
+                                        onChange={e => updateMeasurementUnit(index, e.target.value)}
                                     >
-                                        <option>грамм</option>
-                                        <option>кг</option>
-                                        <option>мл</option>
-                                        <option>литр</option>
+                                        <option value="g">грамм</option>
+                                        <option value="kg">кг</option>
+                                        <option value="ml">мл</option>
+                                        <option value="l">литр</option>
                                         <option>шт</option>
                                     </select>
                                 </label>

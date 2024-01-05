@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchIngredients } from '../../../store/warehouseAdminSlice';
 import styles from "../WarehouseTableAdmin/WarehouseTableAdmin.module.css";
@@ -56,6 +55,18 @@ const CompositionTableSecond = () => {
         dispatch(fetchIngredients());
     }, [dispatch]);
 
+
+    const getMeasurementUnitFull = (unit) => {
+        const units = {
+            'g': 'грамм',
+            'kg': 'кг',
+            'ml': 'мл',
+            'l': 'литр'
+        };
+        return units[unit] || unit;
+    };
+
+
     const currentItems = ingredients ? ingredients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
 
     const handlePrevClick = () => {
@@ -96,7 +107,7 @@ const CompositionTableSecond = () => {
                     <tr key={ingredient.id}>
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{ingredient.name}</td>
-                        <td>{`${ingredient.total_quantity}`}</td>
+                        <td>{`${ingredient.total_quantity} ${getMeasurementUnitFull(ingredient.measurement_unit)}`}</td>
                         <td>{ingredient.date_of_arrival}</td>
                         <td className={styles.table__branch}>
                             <img className={styles.dotsIcon} src={dotsIcon} alt="dots" onClick={() => openEditDeleteModal(ingredient.id)}/>

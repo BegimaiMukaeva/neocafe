@@ -142,12 +142,12 @@ const TableAdminPage = () => {
 
         return composition.map(comp => {
             if (comp.ingredient === null) {
-                return `Неизвестный ингредиент (${parseFloat(comp.quantity)} мл)`;
+                return `Неизвестный ингредиент (${parseFloat(comp.quantity)} мл/г)`;
             }
 
             const ingredient = availableIngredients.find(ing => ing.id === comp.ingredient);
             const ingredientName = ingredient ? ingredient.name : 'Неизвестный ингредиент';
-            return `${ingredientName} (${parseFloat(comp.quantity)} мл)`;
+            return `${ingredientName} (${parseFloat(comp.quantity)} мл/г)`;
         }).join(', ');
     };
 

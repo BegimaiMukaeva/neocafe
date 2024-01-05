@@ -78,15 +78,29 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
             return newIngredients;
         });
     };
-    const handleIngredientChange = (index, value) => {
+    // const handleIngredientChange = (index, value) => {
+    //     setIngredients(currentIngredients => {
+    //         const newIngredients = currentIngredients.map((ingredient, idx) => {
+    //             if (idx === index) {
+    //                 return { ...ingredient, amount: value };
+    //             }
+    //             return ingredient;
+    //         });
+    //         console.log('Updated Ingredients After Amount Change:', newIngredients);
+    //         return newIngredients;
+    //     });
+    // };
+
+
+    const handleIngredientChange = (index, field, value) => {
         setIngredients(currentIngredients => {
             const newIngredients = currentIngredients.map((ingredient, idx) => {
                 if (idx === index) {
-                    return { ...ingredient, amount: value };
+                    return { ...ingredient, [field]: value };
                 }
                 return ingredient;
             });
-            console.log('Updated Ingredients After Amount Change:', newIngredients);
+            console.log('Updated Ingredients After Change:', newIngredients);
             return newIngredients;
         });
     };
@@ -330,14 +344,23 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
                                 </div>
 
                                 <div className={styles.compositionOfDish}>
-                                    <label htmlFor="">Кол-во (в гр, мл, л, кг)
+                                    <label htmlFor="">Кол-во (в г/мл)
+                                        {/*<input*/}
+                                        {/*    type="number"*/}
+                                        {/*    placeholder="Количество"*/}
+                                        {/*    value={ingredient.amount}*/}
+                                        {/*    onChange={e => handleIngredientChange(index, 'amount', e.target.value)}*/}
+                                        {/*    className={styles.amountInput}*/}
+                                        {/*/>*/}
+
                                         <input
                                             type="number"
                                             placeholder="Количество"
-                                            value={ingredient.amount}
+                                            value={parseFloat(ingredient.amount)}
                                             onChange={e => handleIngredientChange(index, 'amount', e.target.value)}
                                             className={styles.amountInput}
                                         />
+
                                     </label>
 
                                     {/*<label className={styles.nameOfInput}  htmlFor="">Изм-я*/}
