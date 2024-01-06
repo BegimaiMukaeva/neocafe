@@ -41,67 +41,35 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
     }, []);
 
 
-//              const handleSelectIngredient = (selectedIngredientId, amount, index) => {
-//   const selectedIngredient = availableIngredients.find(ingredient => ingredient.id === selectedIngredientId);
-//   if (selectedIngredient) {
-//     const newIngredients = [...ingredients];
-//     newIngredients[index] = {
-//       id: selectedIngredient.id,
-//       name: selectedIngredient.name,
-//       amount: amount
-//     };
-//     setIngredients(newIngredients);
-//   }
-// };
-//
-//
-// const handleIngredientChange = (index, field, value) => {
-//   const newIngredients = [...ingredients];
-//   newIngredients[index] = { ...newIngredients[index], [field]: value };
-//   setIngredients(newIngredients);
-// };
 
-    const handleSelectIngredient = (selectedIngredientId, index) => {
-        setIngredients(currentIngredients => {
-            const newIngredients = currentIngredients.map((ingredient, idx) => {
-                if (idx === index) {
-                    const selectedIngredient = availableIngredients.find(ingredient => ingredient.id === selectedIngredientId);
-                    return {
-                        ...ingredient,
-                        id: selectedIngredient.id,
-                        name: selectedIngredient.name
-                    };
-                }
-                return ingredient;
-            });
-            console.log('Updated Ingredients After Selection:', newIngredients);
-            return newIngredients;
+const handleSelectIngredient = (selectedIngredientId, index) => {
+    setIngredients(currentIngredients => {
+        return currentIngredients.map((ingredient, idx) => {
+            if (idx === index) {
+                const selectedIngredient = availableIngredients.find(ing => ing.id === selectedIngredientId);
+                return {
+                    ...ingredient,
+                    id: selectedIngredient.id,
+                    name: selectedIngredient.name,
+                    amount: ingredient.amount || '0' // Устанавливаем начальное значение, если оно не задано
+                };
+            }
+            return ingredient;
         });
-    };
-    // const handleIngredientChange = (index, value) => {
-    //     setIngredients(currentIngredients => {
-    //         const newIngredients = currentIngredients.map((ingredient, idx) => {
-    //             if (idx === index) {
-    //                 return { ...ingredient, amount: value };
-    //             }
-    //             return ingredient;
-    //         });
-    //         console.log('Updated Ingredients After Amount Change:', newIngredients);
-    //         return newIngredients;
-    //     });
-    // };
+    });
+};
 
 
-    const handleIngredientChange = (index, field, value) => {
+    const handleIngredientChange = (index, value) => {
         setIngredients(currentIngredients => {
-            const newIngredients = currentIngredients.map((ingredient, idx) => {
+            return currentIngredients.map((ingredient, idx) => {
                 if (idx === index) {
-                    return { ...ingredient, [field]: value };
+                    // Преобразуем значение в строку, если это необходимо
+                    const updatedAmount = value; // Если нужно, используйте parseFloat(value) или value.toString()
+                    return { ...ingredient, amount: updatedAmount };
                 }
                 return ingredient;
             });
-            console.log('Updated Ingredients After Change:', newIngredients);
-            return newIngredients;
         });
     };
 
@@ -141,12 +109,13 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
                     setImage(response.data.image);
                     setSelectedCategoryId(response.data.category.id);
 
+
                     const updatedIngredients = response.data.compositions.map(comp => {
                         const foundIngredient = availableIngredients.find(ing => ing.id === comp.ingredient);
                         return {
                             id: comp.ingredient,
                             name: foundIngredient ? foundIngredient.name : 'Неизвестный ингредиент',
-                            amount: comp.quantity
+                            amount: parseFloat(comp.quantity)
                         };
                     });
 
@@ -166,45 +135,95 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
     };
 
 
+const saveChanges = async () => {
+    if (isFormValid()) {
+        try {
+            const compositions = ingredients.map(ingredient => ({
+                ingredient: ingredient.id,
+                quantity: parseFloat(ingredient.amount).toFixed(2) // Преобразование в число и форматирование как строки
+            }));
 
-    const saveChanges = async () => {
-        if (isFormValid()) {
-            try {
-                const updatedData = {
-                    name: positionName,
-                    description: description,
-                    category_id: parseInt(selectedCategoryId),
-                    price: parseFloat(price),
-                    is_available: true,
-                    compositions: ingredients.map(ingredient => ({
-                        ingredient: ingredient.id,
-                        quantity: parseFloat(ingredient.amount)
-                    }))
-                };
-                console.log(updatedData)
-                const response = await axios.patch(`https://muha-backender.org.kg/admin-panel/items/update/${itemId}/`, updatedData, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-                });
+            const updatedData = {
+                name: positionName,
+                description: description,
+                category_id: parseInt(selectedCategoryId),
+                price: parseFloat(price).toFixed(2),
+                is_available: true,
+                compositions
+            };
 
-                if (imageChanged) {
+            console.log('Отправляемые данные:', updatedData);
+
+            const response = await axios.patch(`https://muha-backender.org.kg/admin-panel/items/update/${itemId}/`, updatedData, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+            });
+
+            console.log('Response:', response);
+
+ if (imageChanged) {
                     const formData = new FormData();
                     formData.append('image', image);
-
                     await axios.patch(`https://muha-backender.org.kg/admin-panel/put-image-to-item/${itemId}/`, formData, {
                         headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
                     });
                 }
+
                 fetchProducts();
                 console.log('Изменения успешно сохранены');
                 onClose();
-            } catch (error) {
-                console.error('Ошибка при сохранении изменений:', error);
-                setErrorMessage("Ошибка при сохранении изменений.");
-            }
-        } else {
-            setErrorMessage("Заполните все обязательные поля.");
+        } catch (error) {
+            console.error('Ошибка при сохранении изменений:', error);
+            setErrorMessage("Ошибка при сохранении изменений.");
         }
-    };
+    } else {
+        setErrorMessage("Заполните все обязательные поля.");
+    }
+};
+
+
+    // const saveChanges = async () => {
+    //     if (isFormValid()) {
+    //         try {
+    //             const compositions = ingredients.map(ingredient => ({
+    //                 ingredient: ingredient.id,
+    //                 quantity: ingredient.amount.toString()
+    //             }));
+    //
+    //             const updatedData = {
+    //                 name: positionName,
+    //                 description: description,
+    //                 category_id: parseInt(selectedCategoryId),
+    //                 price: price.toString(),
+    //                 is_available: true,
+    //                 compositions
+    //             };
+    //
+    //             console.log('Отправляемые данные:', updatedData);
+    //
+    //             const response = await axios.patch(`https://muha-backender.org.kg/admin-panel/items/update/${itemId}/`, updatedData, {
+    //                 headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    //             });
+    //             console.log('Response:', response);
+    //
+    //             if (imageChanged) {
+    //                 const formData = new FormData();
+    //                 formData.append('image', image);
+    //                 await axios.patch(`https://muha-backender.org.kg/admin-panel/put-image-to-item/${itemId}/`, formData, {
+    //                     headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    //                 });
+    //             }
+    //
+    //             fetchProducts();
+    //             console.log('Изменения успешно сохранены');
+    //             onClose();
+    //         } catch (error) {
+    //             console.error('Ошибка при сохранении изменений:', error);
+    //             setErrorMessage("Ошибка при сохранении изменений.");
+    //         }
+    //     } else {
+    //         setErrorMessage("Заполните все обязательные поля.");
+    //     }
+    // };
 
 
     const addIngredient = () => {
@@ -354,26 +373,15 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
                                         {/*/>*/}
 
                                         <input
-                                            type="number"
+                                            type="string"
                                             placeholder="Количество"
-                                            value={parseFloat(ingredient.amount)}
-                                            onChange={e => handleIngredientChange(index, 'amount', e.target.value)}
+                                            value={ingredient.amount}
+                                            onChange={e => handleIngredientChange(index, e.target.value)}
                                             className={styles.amountInput}
                                         />
 
-                                    </label>
 
-                                    {/*<label className={styles.nameOfInput}  htmlFor="">Изм-я*/}
-                                    {/*    <select*/}
-                                    {/*        className={styles.selectInput}*/}
-                                    {/*    >*/}
-                                    {/*      <option>грамм</option>*/}
-                                    {/*      <option>кг</option>*/}
-                                    {/*      <option>мл</option>*/}
-                                    {/*      <option>литр</option>*/}
-                                    {/*      <option>шт</option>*/}
-                                    {/*  </select>*/}
-                                    {/*</label>*/}
+                                    </label>
 
                                 </div>
 
@@ -398,3 +406,8 @@ function EditPositionMenu({ isVisible , onClose, fetchProducts , itemId }) {
 }
 
 export default EditPositionMenu;
+
+
+
+
+
