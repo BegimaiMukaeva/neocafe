@@ -27,7 +27,7 @@ const SidebarAdmin = () => {
                 <img src={iconSidebar} alt=""/>
             </div>
             <div className={styles.sidebarMenu}>
-                <Link to='/' className={`${styles.sidebar} ${isActive('/') ? styles.active : ''}`}>Меню</Link>
+                <Link to='/menu-admin-page' className={`${styles.sidebar} ${isActive('/menu-admin-page') ? styles.active : ''}`}>Меню</Link>
             </div>
             <div className={styles.sidebarMenu}>
                 <Link to='/warehouse-admin-page' className={`${styles.sidebar} ${isActive('/warehouse-admin-page') ? styles.active : ''}`}>Склад</Link>

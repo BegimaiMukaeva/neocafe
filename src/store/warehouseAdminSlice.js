@@ -10,7 +10,6 @@ export const fetchProducts = createAsyncThunk(
           headers: { 'Authorization': `Bearer ${accessToken}` },
         });
         return response.data;
-          console.log(response.data)
       } catch (error) {
         return rejectWithValue(error.response.data);
       }
@@ -92,7 +91,6 @@ export const addProduct = createAsyncThunk(
             description: productData.description,
             category: productData.selectedCategoryId,
             available_at_branches: productData.available_at_branches,
-            // measurement_unit: productData.measurement_unit,
           };
         } else if (productData.category === "Сырье") {
           url = 'https://muha-backender.org.kg/admin-panel/ingredients/create/';

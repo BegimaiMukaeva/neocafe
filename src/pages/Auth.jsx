@@ -49,7 +49,7 @@ const Auth = () => {
         localStorage.setItem('accessToken', response.data.access);
         localStorage.setItem('refreshToken', response.data.refresh);
 
-        navigate('/');
+        navigate('/menu-admin-page');
       } else {
         throw new Error('Ошибка авторизации');
       }
