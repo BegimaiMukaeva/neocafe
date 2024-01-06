@@ -30,7 +30,7 @@ function AddPositionModal({ isVisible, onClose }) {
     const dropdownRef = useRef(null);
     const dropdownBranchesRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState({});
-    const [measurementUnit, setMeasurementUnit] = useState('');
+    const [measurementUnit, setMeasurementUnit] = useState('g');
 
     const [branchAllocations, setBranchAllocations] = useState([{
         branch: { id: null, name: '' },
@@ -461,7 +461,7 @@ function AddPositionModal({ isVisible, onClose }) {
                                     <select
                                         className={styles.selectInput}
                                         value={allocation.measurementUnit}
-                                        onChange={e => updateMeasurementUnit(index, e.target.value)}
+                                         onChange={handleMeasurementUnitChange}
                                     >
                                         <option value="g">грамм</option>
                                         <option value="kg">кг</option>
