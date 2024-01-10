@@ -5,14 +5,13 @@ import { setProducts } from '../../store/compositionMenuSlice';
 import styles from "./TableAdminPage.module.css";
 import {
     CaretDownOutlined,
-    LeftOutlined,
-    RightOutlined,
 } from "@ant-design/icons";
 import dotsIcon from "../../Assets/admin/admin/DotsThreeVertical.svg";
 import AddNewCategory from '../../components/modalMenu/AddNewCategory/AddNewCategory';
 import TrashSimple from '../../img/TrashSimple.svg';
 import DeleteCategoryModal from '../modalMenu/DeleteCategoryModal/DeleteCategoryModal';
 import EditDeleteItemModel from '../modalMenu/EditDeleteItemModel/EditDeleteItemModel';
+import {Pagination} from "antd";
 
 
 const TableAdminPage = () => {
@@ -27,7 +26,9 @@ const TableAdminPage = () => {
     const [selectedCategory, setSelectedCategory] = useState("");
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+    // const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = products ? products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [hoveredCategory, setHoveredCategory] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -39,6 +40,9 @@ const TableAdminPage = () => {
     const [categoryNameToDelete, setCategoryNameToDelete] = useState('');
     const [availableIngredients, setAvailableIngredients] = useState([]);
 
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
+    };
 
     const fetchAvailableIngredients = async () => {
         try {
@@ -70,27 +74,6 @@ const TableAdminPage = () => {
             console.error('Ошибка при получении категорий: ', error);
         }
     };
-    // const fetchProducts = async () => {
-    //     try {
-    //         const accessToken = localStorage.getItem('accessToken');
-    //         const response = await axios.get('https://muha-backender.org.kg/admin-panel/items/', {
-    //             headers: {
-    //                 'accept': 'application/json',
-    //                 'Authorization': `Bearer ${accessToken}`,
-    //             }
-    //         });
-    //         dispatch(setProducts(response.data));
-    //     } catch (error) {
-    //         console.error('Ошибка при получении продуктов:', error);
-    //     }
-    // };
-    //
-    //
-    // useEffect(() => {
-    //     fetchProducts();
-    // }, []);
-    //
-
 
     const fetchProducts = async (categoryName = '') => {
         try {
@@ -167,22 +150,6 @@ const TableAdminPage = () => {
     }, [isModalOpen]);
 
 
-    const handlePaginationClick = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    const handlePrevClick = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const handleNextClick = () => {
-        if (currentPage < Math.ceil(products.length / itemsPerPage)) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
     const toggleModal = () => {
         setIsModalOpen(true);
     };
@@ -238,12 +205,12 @@ const TableAdminPage = () => {
                         {showDropdown && (
                             <div className={styles.dropdown}>
                                 <div
-                            className={styles.menuCategory}
-                            key="all-categories"
-                            onClick={() => handleCategorySelect('Все категории')}
-                        >
-                            Все категории
-                        </div>
+                                    className={styles.menuCategory}
+                                    key="all-categories"
+                                    onClick={() => handleCategorySelect('Все категории')}
+                                >
+                                    Все категории
+                                </div>
                                 {categories.map((category) => (
                                     <div
                                         className={styles.menuCategory}
@@ -305,23 +272,32 @@ const TableAdminPage = () => {
                 </tbody>
             </table>
             <div className={styles.paginationContainer}>
-                <button className={styles.leftBtn} onClick={handlePrevClick}>
-                    <LeftOutlined />
-                </button>
-                {Array.from({
-                    length: Math.ceil(products.length / itemsPerPage),
-                }).map((_, index) => (
-                    <button
-                        className={index + 1 === currentPage ? styles.activeNum : undefined}
-                        key={index}
-                        onClick={() => handlePaginationClick(index + 1)}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-                <button className={styles.rightBtn} onClick={handleNextClick}>
-                    <RightOutlined />
-                </button>
+                <Pagination
+                    current={currentPage}
+                    onChange={handlePageChange}
+                    total={products.length}
+                    pageSize={itemsPerPage}
+                    hideOnSinglePage={true}
+                    itemRender={(current, type, originalElement) => {
+                        if (type === 'page') {
+                            let element = null;
+                            if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                                element = originalElement;
+                            } else if (current === 1 || current === Math.ceil(products.length / itemsPerPage)) {
+                                element = originalElement;
+                            } else {
+                                if (Math.abs(current - currentPage) === 2) {
+                                    element = <span>...</span>;
+                                } else {
+                                    element = <span style={{ display: 'none' }}>...</span>;
+                                }
+                            }
+                            return element;
+                        }
+                        return originalElement;
+                    }}
+                />
+
             </div>
         </div>
     );

@@ -79,10 +79,7 @@ function AddNewBranch({ isVisible , onClose }) {
                     'Authorization': `Bearer ${accessToken}`,
                 }
             });
-
-            // Обновление Redux после успешной загрузки изображения
             await dispatch(fetchBranches());
-
             console.log('Изображение филиала успешно загружено');
             resetFields();
             onClose();
@@ -118,10 +115,6 @@ function AddNewBranch({ isVisible , onClose }) {
             setErrorMessages([error.message || "Ошибка при создании филиала"]);
         }
     };
-
-
-
-
 
     return (
         isVisible && (

@@ -110,9 +110,6 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
     }, [editedSchedule]);
 
 
-
-
-
     const saveBranchData = async () => {
         const updatedData = {
             name_of_shop: positionName,
@@ -161,8 +158,6 @@ function EditBranchModal({ isVisible, onClose, branchId }) {
         await saveBranchSchedule();
         await saveBranchImage();
     };
-
-
 
     const saveBranchImage = async () => {
         const formData = new FormData();

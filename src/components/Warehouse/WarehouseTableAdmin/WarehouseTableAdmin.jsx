@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from '../../../store/warehouseAdminSlice';
 import styles from "./WarehouseTableAdmin.module.css";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../modalWarehouse/EditDeleteItemModel/EditDeleteItemModel';
+import {Pagination} from "antd";
 
 const WarehouseTableAdmin = () => {
     const dispatch = useDispatch();
@@ -17,57 +16,16 @@ const WarehouseTableAdmin = () => {
     const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
 
-    // useEffect(() => {
-    //   const fetchProducts = async () => {
-    //     const url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/';
-    //
-    //     try {
-    //       const accessToken = localStorage.getItem('accessToken');
-    //       const response = await axios.get(url, {
-    //         headers: {
-    //           'Authorization': `Bearer ${accessToken}`
-    //         }
-    //       });
-    //       setProducts(response.data);
-    //       console.log( response.data);
-    //     } catch (error) {
-    //       console.error('Ошибка при получении продукции:', error);
-    //     }
-    //   };
-    //
-    //   fetchProducts();
-    // }, []);
-
-
-    // const fetchProducts = async () => {
-    //   const url = 'https://muha-backender.org.kg/admin-panel/ready-made-products/';
-    //   try {
-    //     const accessToken = localStorage.getItem('accessToken');
-    //     const response = await axios.get(url, {
-    //       headers: {
-    //         'Authorization': `Bearer ${accessToken}`
-    //       }
-    //     });
-    //     setProducts(response.data);
-    //     console.log(response.data)
-    //   } catch (error) {
-    //     console.error('Ошибка при получении ингредиентов:', error);
-    //   }
-    // };
 
     useEffect(() => {
         dispatch(fetchProducts());
     }, [dispatch]);
 
-    const currentItems = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const handlePrevClick = () => {
-        setCurrentPage(prev => Math.max(prev - 1, 1));
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
     };
 
-    const handleNextClick = () => {
-        setCurrentPage(prev => Math.min(prev + 1, Math.ceil(products.length / itemsPerPage)));
-    };
+    const currentItems = products ? products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
 
     const openEditDeleteModal = (itemId) => {
         setCurrentItemId(itemId);
@@ -77,7 +35,6 @@ const WarehouseTableAdmin = () => {
     const closeEditDeleteModal = () => {
         setIsOpenEditDeleteModal(false);
     };
-
     return (
         <div className={styles.main}>
             <table className={styles.table}>
@@ -117,21 +74,31 @@ const WarehouseTableAdmin = () => {
                 </tbody>
             </table>
             <div className={styles.paginationContainer}>
-                <button className={styles.leftBtn} onClick={handlePrevClick}>
-                    <LeftOutlined />
-                </button>
-                {Array.from({ length: Math.ceil(products.length / itemsPerPage) }, (_, index) => (
-                    <button
-                        className={currentPage === index + 1 ? styles.activeNum : undefined}
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-                <button className={styles.rightBtn} onClick={handleNextClick}>
-                    <RightOutlined />
-                </button>
+                <Pagination
+                    current={currentPage}
+                    onChange={handlePageChange}
+                    total={products.length}
+                    pageSize={itemsPerPage}
+                    hideOnSinglePage={true}
+                    itemRender={(current, type, originalElement) => {
+                        if (type === 'page') {
+                            let element = null;
+                            if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                                element = originalElement;
+                            } else if (current === 1 || current === Math.ceil(products.length / itemsPerPage)) {
+                                element = originalElement;
+                            } else {
+                                if (Math.abs(current - currentPage) === 2) {
+                                    element = <span>...</span>;
+                                } else {
+                                    element = <span style={{ display: 'none' }}>...</span>;
+                                }
+                            }
+                            return element;
+                        }
+                        return originalElement;
+                    }}
+                />
             </div>
         </div>
     );

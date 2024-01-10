@@ -6,15 +6,12 @@ import {deleteStaffAdmin} from "../../../store/staffAdminSlice";
 
 const DeleteStaffModel = ({ isVisible, onClose, employeeId }) => {
     const dispatch = useDispatch();
-
-
     const handleSubmit = () => {
         dispatch(deleteStaffAdmin(employeeId))
             .then(() => {
                 onClose();
             });
     };
-
 
     return (
         <div className={isVisible ? styles.modalDeleteWrapper : styles.modalHidden}>

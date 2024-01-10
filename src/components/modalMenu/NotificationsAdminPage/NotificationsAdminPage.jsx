@@ -65,7 +65,7 @@ const NotificationsAdminPage = ({ isVisible, onClose }) => {
             <button className={styles.modalClearNotifications} onClick={clearAllNotifications}>Очистить все</button>
             <div className={styles.modalContent}>
                 {notifications.length === 0 ? (
-                    <div className={styles.noNotifications}>No new notifications</div>
+                    <div className={styles.noNotifications}>Новых уведомлений нет</div>
                 ) : (
                     notifications.map(notification => (
                         <div className={styles.modalNotificationsMessage} key={notification.id}>

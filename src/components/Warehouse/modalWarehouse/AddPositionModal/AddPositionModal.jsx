@@ -99,7 +99,7 @@ function AddPositionModal({ isVisible, onClose }) {
         .map(allocation => ({
             branch: allocation.branch.id,
             quantity: Number(allocation.amount),
-            minimal_limit: Number(allocation.positionLimit) || 0, // Используйте positionLimit из allocation
+            minimal_limit: Number(allocation.positionLimit) || 0,
         }));
     const handleMeasurementUnitChange = (e) => {
         setMeasurementUnit(e.target.value);
@@ -125,28 +125,6 @@ function AddPositionModal({ isVisible, onClose }) {
             console.error('Ошибка при загрузке изображения:', error);
         }
     };
-
-
-    // const handleSubmit = () => {
-    //     const productData = {
-    //         name: positionName,
-    //         category: productCategory,
-    //         price: price,
-    //         description: description,
-    //         selectedCategoryId: selectedCategoryId,
-    //         available_at_branches: availableAtBranches,
-    //     };
-    //     dispatch(addProduct(productData))
-    //         .then(() => {
-    //             onClose();
-    //             resetFields();
-    //         })
-    //         .catch(error => {
-    //             console.error('Ошибка при добавлении продукции:', error);
-    //             setErrorMessage("Произошла ошибка при добавлении продукции.");
-    //         });
-    // };
-    //
 
     const handleSubmit = async () => {
         const productData = {
@@ -196,12 +174,7 @@ function AddPositionModal({ isVisible, onClose }) {
         updatedAllocations[index].branch = { id: branchId, name: branchName };
         setBranchAllocations(updatedAllocations);
     };
-    // const updateBranchQuantity = (index, amount) => {
-    //     const updatedAllocations = [...branchAllocations];
-    //     updatedAllocations[index].amount = amount;
-    //     setBranchAllocations(updatedAllocations);
-    // };
-    //
+
 
     const addBranchAllocation = () => {
         setBranchAllocations([...branchAllocations, { branch: "", amount: "" }]);
@@ -423,30 +396,6 @@ function AddPositionModal({ isVisible, onClose }) {
                                     />
                                 </label>
                             </div>
-                            {/*<div className={styles.compositionOfDish}>*/}
-                            {/*    <label className={styles.nameOfInput}>Минимальный лимит*/}
-                            {/*        <input*/}
-                            {/*            type="text"*/}
-                            {/*            placeholder="Например: 2 кг"*/}
-                            {/*            value={positionLimit}*/}
-                            {/*            onChange={e => setPositionLimit(e.target.value)}*/}
-                            {/*            className={styles.minimalLimit}*/}
-                            {/*        />*/}
-                            {/*    </label>*/}
-                            {/*    <label className={styles.nameOfInput} htmlFor="">Изм-я*/}
-                            {/*        <select*/}
-                            {/*            className={styles.selectInput}*/}
-                            {/*            value={measurementUnit} // Привязка состояния к select*/}
-                            {/*            onChange={handleMeasurementUnitChange}*/}
-                            {/*        >*/}
-                            {/*            <option value="g">грамм</option>*/}
-                            {/*            <option value="kg">кг</option>*/}
-                            {/*            <option value="ml">мл</option>*/}
-                            {/*            <option value="l">литр</option>*/}
-                            {/*        </select>*/}
-                            {/*    </label>*/}
-                            {/*</div>*/}
-
                             <div className={styles.compositionOfDish}>
                                 <label className={styles.nameOfInput}>Минимальный лимит
                                     <input

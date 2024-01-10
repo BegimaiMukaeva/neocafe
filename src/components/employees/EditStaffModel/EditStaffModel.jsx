@@ -8,7 +8,7 @@ import dropdownVector from "../../../img/dropdown-vector.svg";
 import {editStaffAdmin} from "../../../store/staffAdminSlice";
 
 function EditStaffModel({ isVisible , onClose, employeeId }) {
-        const dispatch = useDispatch();
+    const dispatch = useDispatch();
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [positionName, setPositionName] = useState('');
@@ -125,16 +125,14 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
     };
 
 
- useEffect(() => {
-    console.log('Запрашиваемый ID сотрудника:', employeeId);
-    if (employeeId) {
-        fetchEmployeeData(employeeId, branches);
-    } else {
-        console.error('ID сотрудника не определен');
-    }
-}, [employeeId]);
-
-
+    useEffect(() => {
+        console.log('Запрашиваемый ID сотрудника:', employeeId);
+        if (employeeId) {
+            fetchEmployeeData(employeeId, branches);
+        } else {
+            console.error('ID сотрудника не определен');
+        }
+    }, [employeeId]);
 
     const saveUpdatedEmployeeData = async () => {
         const updatedEmployeeData = {
@@ -162,15 +160,15 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
         //     console.error('Ошибка при обновлении данных сотрудника:', error.response?.data || error.message);
         // }
         dispatch(editStaffAdmin({ employeeId, updatedEmployeeData }))
-        .then(() => {
-        return saveUpdatedWorkSchedule();
-    })
-    .then(() => {
-        onClose();
-    })
-    .catch(error => {
-        console.error('Ошибка при обновлении сотрудника:', error);
-    });
+            .then(() => {
+                return saveUpdatedWorkSchedule();
+            })
+            .then(() => {
+                onClose();
+            })
+            .catch(error => {
+                console.error('Ошибка при обновлении сотрудника:', error);
+            });
     };
 
 
@@ -365,8 +363,6 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
                             )}
                         </div>
                     </label>
-
-
                     <p className={styles.imageLabel}>Заполните график работы</p>
                     <div className={styles.dayAndTime}>
                         <p className={styles.dayAndTimeTitle}>День недели</p>
@@ -404,7 +400,6 @@ function EditStaffModel({ isVisible , onClose, employeeId }) {
                             </div>
                         </div>
                     ))}
-
                     <div className={styles.buttons}>
                         <button className={styles.cancelButton} onClick={() => {
                             onClose();

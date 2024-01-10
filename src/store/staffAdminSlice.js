@@ -91,14 +91,14 @@ function getBranchNameById(branchId, branchesData) {
 
 
 
-  const formatSchedule = (workdays) => {
+const formatSchedule = (workdays) => {
     if (!workdays) return 'Нет графика';
     const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     return workdays
         .filter(day => day.start_time && day.end_time)
         .map(day => dayNames[day.workday - 1])
         .join(', ');
-  };
+};
 
 const convertPosition = (position) => {
     switch(position) {
@@ -187,7 +187,7 @@ const staffAdminSlice = createSlice({
         setSearchTerm: (state, action) => {
             state.searchTerm = action.payload;
         },
-         extraReducers: {
+        extraReducers: {
             [fetchStaffBySearch.fulfilled]: (state, action) => {
                 state.searchResults = action.payload;
             },

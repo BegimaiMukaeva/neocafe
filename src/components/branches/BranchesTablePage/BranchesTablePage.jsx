@@ -2,13 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import {fetchBranches} from "../../../store/branchesAdminSlice";
 import styles from "./BranchesTablePage.module.css";
-import {
-    LeftOutlined,
-    RightOutlined,
-} from "@ant-design/icons";
+import { Pagination } from 'antd';
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../EditDeleteItemModel/EditDeleteItemModel';
-
 
 const BranchesTablePage = () => {
     const dispatch = useDispatch();
@@ -22,28 +18,17 @@ const BranchesTablePage = () => {
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = branches.slice(indexOfFirstItem, indexOfLastItem);
 
     useEffect(() => {
         dispatch(fetchBranches());
     }, [dispatch]);
 
 
-    const handlePaginationClick = (pageNumber) => {
-        setCurrentPage(pageNumber);
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
     };
 
-    const handlePrevClick = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const handleNextClick = () => {
-        if (currentPage < Math.ceil(branches.length/ itemsPerPage)) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
+    const currentItems = branches ? branches.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
 
     const openEditDeleteModal = (itemId) => {
         setCurrentItemId(itemId);
@@ -85,8 +70,6 @@ const BranchesTablePage = () => {
 
         return scheduleDescription.slice(0, -2);
     };
-
-
 
     useEffect(() => {
         const handleDocumentClick = (event) => {
@@ -146,21 +129,32 @@ const BranchesTablePage = () => {
                 </tbody>
             </table>
             <div className={styles.paginationContainer}>
-                <button className={styles.leftBtn} onClick={handlePrevClick}>
-                    <LeftOutlined />
-                </button>
-                {Array.from({ length: Math.ceil(branches.length / itemsPerPage) }).map((_, index) => (
-                    <button
-                        className={index + 1 === currentPage ? styles.activeNum : undefined}
-                        key={index}
-                        onClick={() => handlePaginationClick(index + 1)}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-                <button className={styles.rightBtn} onClick={handleNextClick}>
-                    <RightOutlined />
-                </button>
+                <Pagination
+                    current={currentPage}
+                    onChange={handlePageChange}
+                    total={branches.length}
+                    pageSize={itemsPerPage}
+                    hideOnSinglePage={true}
+                    itemRender={(current, type, originalElement) => {
+                        if (type === 'page') {
+                            let element = null;
+                            if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                                element = originalElement;
+                            } else if (current === 1 || current === Math.ceil(branches.length / itemsPerPage)) {
+                                element = originalElement;
+                            } else {
+                                if (Math.abs(current - currentPage) === 2) {
+                                    element = <span>...</span>;
+                                } else {
+                                    element = <span style={{ display: 'none' }}>...</span>;
+                                }
+                            }
+                            return element;
+                        }
+                        return originalElement;
+                    }}
+                />
+
             </div>
         </div>
     );

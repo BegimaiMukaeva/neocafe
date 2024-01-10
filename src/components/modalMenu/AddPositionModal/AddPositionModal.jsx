@@ -117,8 +117,6 @@ function AddPositionModal({ isVisible, onClose, options }) {
         }
     };
 
-
-
     const addIngredient = () => {
         setIngredients([...ingredients, { id: "", name: "", amount: "" }]);
     };

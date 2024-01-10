@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "../WarehouseBalanceTable/WarehouseBalanceTable.module.css";
-import {
-  CaretDownOutlined,
-  LeftOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { CaretDownOutlined }
+  from "@ant-design/icons";
 import axios from "axios";
+import {Pagination} from "antd";
 
 
 const FinishedProductTable = () => {
@@ -19,6 +17,7 @@ const FinishedProductTable = () => {
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -72,24 +71,13 @@ const FinishedProductTable = () => {
       ? lowStockProducts.filter(item => item.name_of_shop === selectedCategory)
       : lowStockProducts;
 
-  const currentItems = filteredLowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
-
-
-  const handlePaginationClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  // const currentItems = filteredLowStockProducts.slice(indexOfFirstItem, indexOfLastItem);
+  const handlePageChange = (page, pageSize) => {
+    setCurrentPage(page);
   };
 
-  const handlePrevClick = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  const currentItems = filteredLowStockProducts ? filteredLowStockProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
 
-  const handleNextClick = () => {
-    if (currentPage < Math.ceil(filteredLowStockProducts.length / itemsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
 
   useEffect(() => {
     const handleDocumentClick = (event) => {
@@ -151,19 +139,31 @@ const FinishedProductTable = () => {
           </tbody>
         </table>
         <div className={styles.paginationContainer}>
-          <button className={styles.leftBtn} onClick={handlePrevClick}>
-            <LeftOutlined />
-          </button>
-          {Array.from({
-            length: Math.ceil(lowStockProducts.length / itemsPerPage),
-          }).map((item, index) => (
-              <button className={ index + 1 === currentPage ?  styles.activeNum : undefined} key={index} onClick={() => handlePaginationClick(index + 1)}>
-                {index + 1}
-              </button>
-          ))}
-          <button className={styles.rightBtn} onClick={handleNextClick}>
-            <RightOutlined />
-          </button>
+          <Pagination
+              current={currentPage}
+              onChange={handlePageChange}
+              total={filteredLowStockProducts.length}
+              pageSize={itemsPerPage}
+              hideOnSinglePage={true}
+              itemRender={(current, type, originalElement) => {
+                if (type === 'page') {
+                  let element = null;
+                  if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                    element = originalElement;
+                  } else if (current === 1 || current === Math.ceil(filteredLowStockProducts.length / itemsPerPage)) {
+                    element = originalElement;
+                  } else {
+                    if (Math.abs(current - currentPage) === 2) {
+                      element = <span>...</span>;
+                    } else {
+                      element = <span style={{ display: 'none' }}>...</span>;
+                    }
+                  }
+                  return element;
+                }
+                return originalElement;
+              }}
+          />
         </div>
       </div>
   );

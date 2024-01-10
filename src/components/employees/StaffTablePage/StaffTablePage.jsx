@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchStaff } from '../../../store/staffAdminSlice';
 import {setStaffs} from '../../../store/staffAdminSlice';
+import { Pagination } from 'antd';
 import {updateEmployees} from '../../../store/staffAdminSlice';
 import styles from "./StaffTablePage.module.css";
 import {
   CaretDownOutlined,
-  LeftOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../EditDeleteItemModel/EditDeleteItemModel';
@@ -20,6 +19,8 @@ const StaffTablePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  const currentItems = employees ? employees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -31,6 +32,11 @@ const StaffTablePage = () => {
   useEffect(() => {
     dispatch(fetchStaff());
   }, [dispatch]);
+
+
+  const handlePageChange = (page, pageSize) => {
+    setCurrentPage(page);
+  };
 
 
   // useEffect(() => {
@@ -85,8 +91,6 @@ const StaffTablePage = () => {
   //       .map(day => dayNames[day.workday - 1])
   //       .join(', ');
   // };
-
-
 
   const fetchEmployeesByBranch = async (branchId) => {
     let url = 'https://muha-backender.org.kg/admin-panel/employees/';
@@ -187,23 +191,6 @@ const StaffTablePage = () => {
     setShowDropdown(!showDropdown);
   };
 
-  const handlePaginationClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePrevClick = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextClick = () => {
-    if (currentPage < Math.ceil(employees.length / itemsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-
   const openEditDeleteModal = (itemId) => {
     setCurrentItemId(itemId);
     setIsOpenEditDeleteModal(true);
@@ -293,19 +280,32 @@ const StaffTablePage = () => {
           </tbody>
         </table>
         <div className={styles.paginationContainer}>
-          <button className={styles.leftBtn} onClick={handlePrevClick}>
-            <LeftOutlined />
-          </button>
-          {Array.from({
-            length: Math.ceil(employees.length / itemsPerPage),
-          }).map((item, index) => (
-              <button className={ index + 1 === currentPage ?  styles.activeNum : undefined} key={index} onClick={() => handlePaginationClick(index + 1)}>
-                {index + 1}
-              </button>
-          ))}
-          <button className={styles.rightBtn} onClick={handleNextClick}>
-            <RightOutlined />
-          </button>
+          <Pagination
+              current={currentPage}
+              onChange={handlePageChange}
+              total={employees.length}
+              pageSize={itemsPerPage}
+              hideOnSinglePage={true}
+              itemRender={(current, type, originalElement) => {
+                if (type === 'page') {
+                  let element = null;
+                  if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                    element = originalElement;
+                  } else if (current === 1 || current === Math.ceil(employees.length / itemsPerPage)) {
+                    element = originalElement;
+                  } else {
+                    if (Math.abs(current - currentPage) === 2) {
+                      element = <span>...</span>;
+                    } else {
+                      element = <span style={{ display: 'none' }}>...</span>;
+                    }
+                  }
+                  return element;
+                }
+                return originalElement;
+              }}
+          />
+
         </div>
       </div>
   );

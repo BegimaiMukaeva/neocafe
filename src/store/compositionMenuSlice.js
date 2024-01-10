@@ -42,22 +42,22 @@ export const fetchProducts = createAsyncThunk(
 
 
 export const fetchProductsBySearch = createAsyncThunk(
-  'compositionMenu/fetchProductsBySearch',
-  async (searchTerm, { dispatch }) => {
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get(`https://muha-backender.org.kg/admin-panel/items/?name=${searchTerm}`, {
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+    'compositionMenu/fetchProductsBySearch',
+    async (searchTerm, { dispatch }) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.get(`https://muha-backender.org.kg/admin-panel/items/?name=${searchTerm}`, {
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            dispatch(setProducts(response.data))
+            return response.data;
+        } catch (error) {
+            console.error('Ошибка при поиске продуктов:', error);
         }
-      });
-      dispatch(setProducts(response.data))
-         return response.data;
-    } catch (error) {
-      console.error('Ошибка при поиске продуктов:', error);
     }
-  }
 );
 
 
@@ -104,13 +104,13 @@ const compositionMenuSlice = createSlice({
             return action.payload;
         },
         setSearchTerm: (state, action) => {
-        state.searchTerm = action.payload;
-    },
+            state.searchTerm = action.payload;
+        },
         extraReducers: {
-  [fetchProductsBySearch.fulfilled]: (state, action) => {
-    state.searchResults = action.payload;
-  },
-}
+            [fetchProductsBySearch.fulfilled]: (state, action) => {
+                state.searchResults = action.payload;
+            },
+        }
     }
 });
 

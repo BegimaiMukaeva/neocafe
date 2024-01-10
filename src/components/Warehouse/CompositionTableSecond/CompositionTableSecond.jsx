@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchIngredients } from '../../../store/warehouseAdminSlice';
 import styles from "../WarehouseTableAdmin/WarehouseTableAdmin.module.css";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Pagination } from 'antd';
 import dotsIcon from "../../../Assets/admin/admin/DotsThreeVertical.svg";
 import EditDeleteItemModel from '../modalWarehouse/EditDeleteItemModel/EditDeleteItemModel';
 
@@ -14,42 +14,6 @@ const CompositionTableSecond = () => {
     const itemsPerPage = 4;
     const [isOpenEditDeleteModal, setIsOpenEditDeleteModal] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
-
-    // useEffect(() => {
-    //   const fetchIngredients = async () => {
-    //     const url = 'https://muha-backender.org.kg/admin-panel/ingredients/';
-    //     try {
-    //       const accessToken = localStorage.getItem('accessToken');
-    //       const response = await axios.get(url, {
-    //         headers: {
-    //           'Authorization': `Bearer ${accessToken}`
-    //         }
-    //       });
-    //       setIngredients(response.data);
-    //       console.log(response.data)
-    //     } catch (error) {
-    //       console.error('Ошибка при получении ингредиентов:', error);
-    //     }
-    //   };
-    //
-    //   fetchIngredients();
-    // }, []);
-
-    // const fetchIngredients = async () => {
-    //   const url = 'https://muha-backender.org.kg/admin-panel/ingredients/';
-    //   try {
-    //     const accessToken = localStorage.getItem('accessToken');
-    //     const response = await axios.get(url, {
-    //       headers: {
-    //         'Authorization': `Bearer ${accessToken}`
-    //       }
-    //     });
-    //     setIngredients(response.data);
-    //     console.log(response.data)
-    //   } catch (error) {
-    //     console.error('Ошибка при получении ингредиентов:', error);
-    //   }
-    // };
 
     useEffect(() => {
         dispatch(fetchIngredients());
@@ -66,16 +30,11 @@ const CompositionTableSecond = () => {
         return units[unit] || unit;
     };
 
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
+    };
 
     const currentItems = ingredients ? ingredients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
-
-    const handlePrevClick = () => {
-        setCurrentPage(prev => Math.max(prev - 1, 1));
-    };
-
-    const handleNextClick = () => {
-        setCurrentPage(prev => Math.min(prev + 1, Math.ceil(ingredients.length / itemsPerPage)));
-    };
 
     const openEditDeleteModal = (itemId) => {
         setCurrentItemId(itemId);
@@ -85,6 +44,7 @@ const CompositionTableSecond = () => {
     const closeEditDeleteModal = () => {
         setIsOpenEditDeleteModal(false);
     };
+
 
     return (
         <div className={styles.main}>
@@ -125,21 +85,32 @@ const CompositionTableSecond = () => {
                 </tbody>
             </table>
             <div className={styles.paginationContainer}>
-                <button className={styles.leftBtn} onClick={handlePrevClick}>
-                    <LeftOutlined />
-                </button>
-                {Array.from({ length: Math.ceil(ingredients.length / itemsPerPage) }, (_, index) => (
-                    <button
-                        className={currentPage === index + 1 ? styles.activeNum : undefined}
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-                <button className={styles.rightBtn} onClick={handleNextClick}>
-                    <RightOutlined />
-                </button>
+                <Pagination
+                    current={currentPage}
+                    onChange={handlePageChange}
+                    total={ingredients.length}
+                    pageSize={itemsPerPage}
+                    hideOnSinglePage={true}
+                    itemRender={(current, type, originalElement) => {
+                        if (type === 'page') {
+                            let element = null;
+                            if (current === currentPage || current === currentPage - 1 || current === currentPage + 1) {
+                                element = originalElement;
+                            } else if (current === 1 || current === Math.ceil(ingredients.length / itemsPerPage)) {
+                                element = originalElement;
+                            } else {
+                                if (Math.abs(current - currentPage) === 2) {
+                                    element = <span>...</span>;
+                                } else {
+                                    element = <span style={{ display: 'none' }}>...</span>;
+                                }
+                            }
+                            return element;
+                        }
+                        return originalElement;
+                    }}
+                />
+
             </div>
         </div>
     );

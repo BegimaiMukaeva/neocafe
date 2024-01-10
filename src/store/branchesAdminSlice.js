@@ -18,26 +18,7 @@ export const fetchBranches = createAsyncThunk(
         }
     }
 );
-//
-// export const addNewBranch = createAsyncThunk(
-//     'branchesAdmin/addNewBranch',
-//     async (branchData, { rejectWithValue, dispatch }) => {
-//         try {
-//             const accessToken = localStorage.getItem('accessToken');
-//             const response = await axios.post('https://muha-backender.org.kg/branches/create/', branchData, {
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     'Authorization': `Bearer ${accessToken}`,
-//                 },
-//             });
-//
-//             dispatch(fetchBranches());
-//             return response.data;
-//         } catch (error) {
-//             return rejectWithValue(error.response.data);
-//         }
-//     }
-// );
+
 
 export const addNewBranch = createAsyncThunk(
     'branchesAdmin/addNewBranch',
@@ -75,7 +56,6 @@ const uploadBranchImage = async (branchId, image, dispatch) => {
                 'Authorization': `Bearer ${accessToken}`,
             }
         });
-        // Обновить данные о филиалах
         dispatch(fetchBranches());
     } catch (error) {
         console.error('Ошибка при загрузке изображения филиала:', error);
