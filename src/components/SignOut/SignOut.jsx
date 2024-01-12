@@ -7,7 +7,7 @@ import closeModal from "../../img/X-black.svg";
 const SignOut = ({ isVisible, onClose }) => {
     const navigate = useNavigate();
     const handleSignOut = () => {
-        navigate('/auth');
+        navigate('/');
     };
 
     return (
